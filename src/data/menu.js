@@ -2,6 +2,14 @@
 // Estructura preparada para migrar a API REST en el futuro
 // Moneda: CLP — Zona de despacho: Quilicura ($2.000)
 
+import imgRollsCarta from '../assets/img/categories/rolls-carta.webp';
+import imgEspeciales from '../assets/img/categories/especiales.webp';
+import imgHardRolls from '../assets/img/categories/hard-rolls.webp';
+import imgAlPlato from '../assets/img/categories/al-plato.webp';
+import imgTablaMassaro from '../assets/img/categories/tabla-massaro.webp';
+import imgPromos from '../assets/img/categories/promos.webp';
+import imgAdicionales from '../assets/img/categories/adicionales.webp';
+
 export const categories = [
   { id: 'promos', name: 'Promos' },
   { id: 'rolls-a-la-carta', name: 'Rolls a la Carta' },
@@ -22,7 +30,7 @@ export const products = [
     description: 'Roll clásico envuelto en salmón fresco con los mejores cortes.',
     price: 5000,
     category: 'rolls-a-la-carta',
-    image: '/src/assets/img/categories/rolls-carta.webp',
+    image: imgRollsCarta,
     badges: ['Popular'],
     variants: [
       { name: 'Pollo', price: 5000 },
@@ -38,7 +46,7 @@ export const products = [
     description: 'Suave y cremoso roll envuelto en palta fresca, relleno a elección.',
     price: 5000,
     category: 'rolls-a-la-carta',
-    image: '/src/assets/img/categories/rolls-carta.webp',
+    image: imgRollsCarta,
     variants: [
       { name: 'Pollo', price: 5000 },
       { name: 'Camarón', price: 5000 },
@@ -53,7 +61,7 @@ export const products = [
     description: 'Roll cubierto con queso gratinado, irresistible.',
     price: 5000,
     category: 'rolls-a-la-carta',
-    image: '/src/assets/img/categories/rolls-carta.webp',
+    image: imgRollsCarta,
     variants: [
       { name: 'Pollo', price: 5000 },
       { name: 'Camarón', price: 5000 },
@@ -68,7 +76,7 @@ export const products = [
     description: 'Roll bañado en masago (hueva de pez volador) con relleno a elección.',
     price: 5000,
     category: 'rolls-a-la-carta',
-    image: '/src/assets/img/categories/rolls-carta.webp',
+    image: imgRollsCarta,
     variants: [
       { name: 'Pollo', price: 5000 },
       { name: 'Camarón', price: 5000 },
@@ -83,7 +91,7 @@ export const products = [
     description: 'Roll tostado con sésamo, crujiente por fuera y suave por dentro.',
     price: 4500,
     category: 'rolls-a-la-carta',
-    image: '/src/assets/img/categories/rolls-carta.webp',
+    image: imgRollsCarta,
     variants: [
       { name: 'Pollo', price: 4500 },
       { name: 'Camarón', price: 4500 },
@@ -98,7 +106,7 @@ export const products = [
     description: 'Roll con ciboullete (cebollín) fresco, ligero y aromático.',
     price: 4500,
     category: 'rolls-a-la-carta',
-    image: '/src/assets/img/categories/rolls-carta.webp',
+    image: imgRollsCarta,
     variants: [
       { name: 'Pollo', price: 4500 },
       { name: 'Camarón', price: 4500 },
@@ -113,7 +121,7 @@ export const products = [
     description: 'Roll frito en tempura, crujiente dorado, relleno a elección.',
     price: 5000,
     category: 'rolls-a-la-carta',
-    image: '/src/assets/img/categories/rolls-carta.webp',
+    image: imgRollsCarta,
     variants: [
       { name: 'Pollo', price: 5000 },
       { name: 'Camarón', price: 5000 },
@@ -132,7 +140,7 @@ export const products = [
     description: '5 cortes gruesos de salmón fresco del sur, servidos con soya.',
     price: 5000,
     category: 'especiales',
-    image: '/src/assets/img/categories/especiales.webp',
+    image: imgEspeciales,
     badges: ['Popular'],
   },
   {
@@ -141,7 +149,7 @@ export const products = [
     description: 'Ceviche fresco de camarón y reineta marinados en limón.',
     price: 6000,
     category: 'especiales',
-    image: '/src/assets/img/categories/especiales.webp',
+    image: imgEspeciales,
   },
   {
     id: 'roll-aceviochado',
@@ -149,7 +157,7 @@ export const products = [
     description: 'Salmón y camarón marinados al estilo ceviche, envueltos en arroz.',
     price: 6000,
     category: 'especiales',
-    image: '/src/assets/img/categories/especiales.webp',
+    image: imgEspeciales,
   },
   {
     id: 'ceviche-roll',
@@ -157,7 +165,7 @@ export const products = [
     description: 'Camarón furay, queso palta y pequeña porción de ceviche.',
     price: 6000,
     category: 'especiales',
-    image: '/src/assets/img/categories/especiales.webp',
+    image: imgEspeciales,
   },
   {
     id: 'roll-estilo-grez',
@@ -165,7 +173,7 @@ export const products = [
     description: 'Sin arroz, base de palta y queso, relleno a elección.',
     price: 6000,
     category: 'especiales',
-    image: '/src/assets/img/categories/especiales.webp',
+    image: imgEspeciales,
   },
   {
     id: 'futomaki',
@@ -173,7 +181,7 @@ export const products = [
     description: 'Roll grande con variedad de ingredientes en su interior.',
     price: 5000,
     category: 'especiales',
-    image: '/src/assets/img/categories/especiales.webp',
+    image: imgEspeciales,
   },
   {
     id: 'futomaki-tempura',
@@ -181,7 +189,7 @@ export const products = [
     description: 'Futomaki frito en tempura, crujiente por fuera.',
     price: 5000,
     category: 'especiales',
-    image: '/src/assets/img/categories/especiales.webp',
+    image: imgEspeciales,
   },
   {
     id: 'hosamaki',
@@ -189,7 +197,7 @@ export const products = [
     description: 'Roll pequeño de un solo ingrediente, sencillo y delicioso.',
     price: 2500,
     category: 'especiales',
-    image: '/src/assets/img/categories/especiales.webp',
+    image: imgEspeciales,
   },
   {
     id: 'gyosas',
@@ -197,7 +205,7 @@ export const products = [
     description: '5 gyosas rellenas, doradas y servidas con salsa agridulce.',
     price: 3000,
     category: 'especiales',
-    image: '/src/assets/img/categories/especiales.webp',
+    image: imgEspeciales,
   },
 
   // =============================================
@@ -209,7 +217,7 @@ export const products = [
     description: 'Roll pequeño y frito relleno de pollo.',
     price: 2000,
     category: 'hard-rolls',
-    image: '/src/assets/img/categories/hard-rolls.webp',
+    image: imgHardRolls,
   },
   {
     id: 'hard-roll-verdura',
@@ -217,7 +225,7 @@ export const products = [
     description: 'Roll pequeño y frito relleno de verduras frescas.',
     price: 2000,
     category: 'hard-rolls',
-    image: '/src/assets/img/categories/hard-rolls.webp',
+    image: imgHardRolls,
   },
   {
     id: 'hard-roll-kanikama',
@@ -225,7 +233,7 @@ export const products = [
     description: 'Roll pequeño y frito relleno de kanikama.',
     price: 2000,
     category: 'hard-rolls',
-    image: '/src/assets/img/categories/hard-rolls.webp',
+    image: imgHardRolls,
   },
   {
     id: 'hard-roll-camaron',
@@ -233,7 +241,7 @@ export const products = [
     description: 'Roll pequeño y frito relleno de camarón.',
     price: 2500,
     category: 'hard-rolls',
-    image: '/src/assets/img/categories/hard-rolls.webp',
+    image: imgHardRolls,
   },
   {
     id: 'hard-roll-salmon',
@@ -241,7 +249,7 @@ export const products = [
     description: 'Roll pequeño y frito relleno de salmón fresco.',
     price: 2500,
     category: 'hard-rolls',
-    image: '/src/assets/img/categories/hard-rolls.webp',
+    image: imgHardRolls,
   },
 
   // =============================================
@@ -253,7 +261,7 @@ export const products = [
     description: '6 camarones fritos en panko, crujientes y dorados.',
     price: 3500,
     category: 'al-plato',
-    image: '/src/assets/img/categories/al-plato.webp',
+    image: imgAlPlato,
   },
   {
     id: 'pollo-crispy',
@@ -261,7 +269,7 @@ export const products = [
     description: '6 cortes de pollo crispy, crujientes por fuera y jugosos por dentro.',
     price: 3500,
     category: 'al-plato',
-    image: '/src/assets/img/categories/al-plato.webp',
+    image: imgAlPlato,
   },
   {
     id: 'reineta-crispy',
@@ -269,7 +277,7 @@ export const products = [
     description: '6 cortes de reineta empanizada, liviana y crujiente.',
     price: 4000,
     category: 'al-plato',
-    image: '/src/assets/img/categories/al-plato.webp',
+    image: imgAlPlato,
   },
   {
     id: 'salmon-crispy',
@@ -277,7 +285,7 @@ export const products = [
     description: '6 cortes de salmón crispy, crocante por fuera y suave por dentro.',
     price: 5500,
     category: 'al-plato',
-    image: '/src/assets/img/categories/al-plato.webp',
+    image: imgAlPlato,
   },
   {
     id: 'gohan',
@@ -285,7 +293,7 @@ export const products = [
     description: 'Arroz blanco con base de queso y palta.',
     price: 4500,
     category: 'al-plato',
-    image: '/src/assets/img/categories/al-plato.webp',
+    image: imgAlPlato,
   },
 
   // =============================================
@@ -297,7 +305,7 @@ export const products = [
     description: '5 Gyosas, 5 Calamar, 5 Camarón Furay, 5 Pollo Furay, 5 Reineta Furay — con variedad de salsas.',
     price: 13500,
     category: 'tabla-massaro',
-    image: '/src/assets/img/categories/tabla-massaro.webp',
+    image: imgTablaMassaro,
     badges: ['Recomendado'],
     pieces: 25,
   },
@@ -311,7 +319,7 @@ export const products = [
     description: '1 Roll Palta Camarón + 1 Porción Gyosas (5 uds) + 3 salsas',
     price: 6500,
     category: 'promos',
-    image: '/src/assets/img/categories/promos.webp',
+    image: imgPromos,
     pieces: 13,
   },
   {
@@ -320,7 +328,7 @@ export const products = [
     description: '1 Roll Palta Pollo + 1 Tempura Kanikama + 3 salsas',
     price: 7500,
     category: 'promos',
-    image: '/src/assets/img/categories/promos.webp',
+    image: imgPromos,
     pieces: 16,
   },
   {
@@ -329,7 +337,7 @@ export const products = [
     description: '1 Roll Palta Camarón + 1 Roll Sésamo Kanikama + 1 Roll Tempura Pollo (base queso, cebollín) + 3 salsas',
     price: 9500,
     category: 'promos',
-    image: '/src/assets/img/categories/promos.webp',
+    image: imgPromos,
     pieces: 24,
   },
   {
@@ -338,7 +346,7 @@ export const products = [
     description: '1 Roll Palta Salmón + 1 Roll Salmón Camarón + 1 Roll Queso Pollo + 1 Roll Sésamo Vegetal + 1 Roll Ciboullete Kanikama + 4 salsas',
     price: 15000,
     category: 'promos',
-    image: '/src/assets/img/categories/promos.webp',
+    image: imgPromos,
     pieces: 40,
   },
   {
@@ -347,7 +355,7 @@ export const products = [
     description: '1 Roll Palta Camarón + 1 Roll Palta Sésamo + 1 Roll Tempura Pollo + 1 Roll Tempura Kanikama + 4 salsas',
     price: 12000,
     category: 'promos',
-    image: '/src/assets/img/categories/promos.webp',
+    image: imgPromos,
     pieces: 32,
   },
   {
@@ -356,7 +364,7 @@ export const products = [
     description: '1 Tempura Pollo + 1 Tempura Kanikama + 1 Tempura Camarón + 1 Tempura Vegetal + 4 salsas',
     price: 12500,
     category: 'promos',
-    image: '/src/assets/img/categories/promos.webp',
+    image: imgPromos,
     pieces: 32,
   },
   {
@@ -365,7 +373,7 @@ export const products = [
     description: '1 Roll Palta Pollo + 1 Roll Kanikama (camarón palta) + 1 Roll Sésamo Vegetal + 1 Roll Tempura Pollo + 1 Roll Tempura Kamikaze + 4 salsas',
     price: 15000,
     category: 'promos',
-    image: '/src/assets/img/categories/promos.webp',
+    image: imgPromos,
     pieces: 40,
   },
   {
@@ -374,7 +382,7 @@ export const products = [
     description: '1 Roll Palta Salmón + 1 Roll Salmón Camarón + 1 Roll Queso Pollo + 1 Roll Sésamo Vegetal + 1 Tempura Pollo + 1 Tempura Camarón + 1 Tempura Kanikama + 5 salsas',
     price: 19000,
     category: 'promos',
-    image: '/src/assets/img/categories/promos.webp',
+    image: imgPromos,
     pieces: 56,
   },
   {
@@ -383,7 +391,7 @@ export const products = [
     description: '1 Futomaki Crispy + 1 Roll Queso (camarón furay) + 1 Roll Palta (salmón) + 1 Roll Palta (camarón) + 1 Roll Salmón (camarón) + 1 Roll Masago Reineta Furay + 1 Roll Ciboullete (champiñón) + 1 Hosamaki Queso + 5 Gyosas + 5 salsas',
     price: 25000,
     category: 'promos',
-    image: '/src/assets/img/categories/promos.webp',
+    image: imgPromos,
     badges: ['Premium'],
     pieces: 63,
   },
@@ -393,7 +401,7 @@ export const products = [
     description: '1 Roll Palta Pollo + 1 Roll Salmón Camarón + 1 Roll Queso Kanikama + 1 Roll Sésamo Vegetal + 1 Tempura Pollo + 1 Tempura Salmón + 1 Tempura Camarón + 1 Tempura Vegetal + 5 salsas',
     price: 24000,
     category: 'promos',
-    image: '/src/assets/img/categories/promos.webp',
+    image: imgPromos,
     pieces: 72,
   },
 
@@ -406,7 +414,7 @@ export const products = [
     description: 'Porción adicional de salsa clásica Massaro.',
     price: 500,
     category: 'adicionales',
-    image: '/src/assets/img/categories/adicionales.webp',
+    image: imgAdicionales,
   },
   {
     id: 'cambio-de-relleeno',
@@ -414,7 +422,7 @@ export const products = [
     description: 'Personaliza tu roll cambiando el relleno estándar.',
     price: 1000,
     category: 'adicionales',
-    image: '/src/assets/img/categories/adicionales.webp',
+    image: imgAdicionales,
   },
   {
     id: 'despacho',
@@ -422,7 +430,7 @@ export const products = [
     description: 'Delivery directo a tu hogar en Quilicura.',
     price: 2000,
     category: 'adicionales',
-    image: '/src/assets/img/categories/adicionales.webp',
+    image: imgAdicionales,
   },
 ];
 
