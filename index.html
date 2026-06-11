@@ -1,0 +1,152 @@
+<!doctype html>
+<html lang="es" data-theme="dark">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <!-- Metadatos básicos para responsividad -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Massaro Sushi</title>
+  </head>
+  <body>
+    <!-- 
+      Layout Principal de la Aplicación 
+      Usamos un wrapper para asegurar que el footer siempre baje
+    -->
+    <div class="app-wrapper">
+      
+      <!-- Cabecera / Navegación Superior -->
+      <header class="header">
+        <div class="container header__inner">
+          <a href="/" class="header__logo">
+            <!-- Logo real de Massaro Sushi -->
+            <img src="/src/assets/img/logo_massaro.jpg" alt="Massaro Sushi" class="header__logo-img" />
+          </a>
+          
+          <!-- Botón Hamburguesa para Móviles -->
+          <button class="header__toggle" aria-label="Abrir Menú" id="menu-toggle">
+            <span class="hamburger-line"></span>
+            <span class="hamburger-line"></span>
+            <span class="hamburger-line"></span>
+          </button>
+
+          <!-- Navegación Principal -->
+          <nav class="header__nav" id="main-nav">
+            <a href="#menu" class="header__link">Menú</a>
+            <a href="#nosotros" class="header__link">Nosotros</a>
+            <a href="#" class="btn btn--primary">Pedir Ahora</a>
+          </nav>
+        </div>
+      </header>
+
+      <!-- Contenido Principal Dinámico -->
+      <main class="main-content">
+        
+        <!-- Sección Hero: Portada de Bienvenida -->
+        <section class="hero">
+          <div class="container hero__inner">
+            <img src="/src/assets/img/logo_massaro.jpg" alt="Massaro Sushi" class="hero__logo" />
+            <h1 class="hero__title">Sushi Artesanal</h1>
+            <p class="hero__subtitle">Rolls clásicos y premium preparados al instante con ingredientes frescos.</p>
+            <a href="#menu" class="btn btn--primary btn--large">Ver Menú</a>
+          </div>
+        </section>
+
+        <div class="container">
+          
+          <!-- Sección del Catálogo de Productos -->
+          <section id="menu" class="catalog">
+            <div class="catalog__header">
+              <h2 class="catalog__title section-title">Nuestra Carta</h2>
+              <p class="catalog__subtitle">Rolls clásicos y premium preparados en el momento.</p>
+            </div>
+
+            <!-- Tabs de Filtro por Categoría (Desktop) -->
+            <div class="catalog__tabs"></div>
+
+            <!-- Filtro por Categoría (Móvil) -->
+            <div class="catalog__filter-mobile">
+              <label for="category-select" class="sr-only">Filtrar por categoría</label>
+              <select id="category-select" class="catalog__select"></select>
+            </div>
+
+            <!-- Cuadrícula de Tarjetas de Producto (renderizada por JS) -->
+            <div class="catalog__grid"></div>
+          </section>
+
+        </div>
+      </main>
+
+      <!-- Pie de Página con información del negocio -->
+      <footer class="footer">
+        <div class="container footer__inner">
+          
+          <!-- Marca -->
+          <div class="footer__brand">
+            <img src="/src/assets/img/logo_massaro.jpg" alt="Massaro Sushi" class="footer__logo" />
+            <span class="footer__name">Massaro Sushi</span>
+          </div>
+
+          <!-- Cuadrícula de información -->
+          <div class="footer__info">
+            
+            <!-- Zona de reparto -->
+            <div>
+              <h4 class="footer__section-title">Delivery</h4>
+              <p class="footer__item">
+                <span>📍</span>
+                <span>Quilicura — Despacho $2.000</span>
+              </p>
+              <p class="footer__item">
+                <span>🕐</span>
+                <span>Lun — Dom, 12:00 — 22:00 hrs</span>
+              </p>
+            </div>
+
+            <!-- Contacto -->
+            <div>
+              <h4 class="footer__section-title">Contacto</h4>
+              <p class="footer__item">
+                <span>📱</span>
+                <a href="https://wa.me/56972377458" target="_blank" rel="noopener">+56 9 7237 7458</a>
+              </p>
+              <p class="footer__item">
+                <span>📧</span>
+                <a href="mailto:info@massaro.cl">info@massaro.cl</a>
+              </p>
+            </div>
+
+            <!-- Redes Sociales -->
+            <div>
+              <h4 class="footer__section-title">Síguenos</h4>
+              <p class="footer__item">
+                <span>📘</span>
+                <a href="https://facebook.com/MassaroQuilicura" target="_blank" rel="noopener">/MassaroQuilicura</a>
+              </p>
+              <p class="footer__item">
+                <span>📸</span>
+                <a href="https://instagram.com/massaro_sushi" target="_blank" rel="noopener">@massaro_sushi</a>
+              </p>
+            </div>
+
+          </div>
+
+          <!-- Copyright -->
+          <div class="footer__bottom">
+            <p>&copy; 2026 Massaro Sushi. Todos los derechos reservados.</p>
+          </div>
+
+        </div>
+      </footer>
+
+      <!-- Botonera de Navegación Flotante (Móviles) -->
+      <nav class="floating-nav" aria-label="Navegación rápida">
+        <a href="#" class="floating-nav__btn">⬆ Inicio</a>
+        <a href="#menu" class="floating-nav__btn">🍣 Menú</a>
+      </nav>
+      
+    </div>
+    
+    <!-- Punto de entrada principal de JavaScript para Vite -->
+    <script type="module" src="/src/main.js"></script>
+  </body>
+</html>

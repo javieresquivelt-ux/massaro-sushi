@@ -1,0 +1,132 @@
+// ==========================================================================
+// Tarjetas de Producto (Cards Component)
+// Estilo glassmorphism oscuro con imágenes reales y precio chip amarillo
+// ==========================================================================
+
+.card {
+  display: flex;
+  flex-direction: column;
+  background: color-mix(in srgb, var(--bg-color-alt) 70%, transparent);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  height: 100%;
+
+  // Efecto hover (elevación y brillo en borde)
+  &:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.3);
+    border-color: rgba(230, 0, 18, 0.3);
+  }
+
+  // Contenedor de la imagen (más grande, aspect-ratio 3/2)
+  &__image-wrapper {
+    width: 100%;
+    aspect-ratio: 3 / 2;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+  }
+
+  &__badge {
+    position: absolute;
+    top: var(--spacing-sm);
+    left: var(--spacing-sm);
+    font-family: var(--font-heading);
+    font-size: 0.75rem;
+    font-weight: 700;
+    padding: 2px 10px;
+    border-radius: var(--radius-pill);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    z-index: 2;
+
+    &--popular {
+      background: var(--color-primary);
+      color: var(--color-white);
+    }
+
+    &--recomendado {
+      background: var(--color-accent);
+      color: var(--color-white);
+    }
+
+    &--premium {
+      background: linear-gradient(135deg, #ffc400, #e60012);
+      color: var(--color-black);
+    }
+
+    &--pieces {
+      left: auto;
+      right: var(--spacing-sm);
+      background: var(--color-primary);
+      color: var(--color-white);
+    }
+  }
+
+  &__variant-hint {
+    font-size: 0.8rem;
+    color: var(--color-secondary);
+    margin-bottom: var(--spacing-md);
+  }
+
+  // Imagen real del producto
+  &__image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.5s ease;
+  }
+
+  // Zoom en la imagen al hacer hover
+  &:hover &__image {
+    transform: scale(1.1);
+  }
+
+  // Contenido de texto y acciones
+  &__content {
+    padding: var(--spacing-lg);
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+  }
+
+  &__title {
+    font-size: 1.25rem;
+    margin-bottom: var(--spacing-xs);
+    color: var(--text-color);
+  }
+
+  &__desc {
+    font-size: 0.9rem;
+    color: var(--text-color-muted);
+    margin-bottom: var(--spacing-lg);
+    flex-grow: 1;
+  }
+
+  // Zona inferior: Precio como chip y Botón
+  &__footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-top: 1px solid rgba(255, 255, 255, 0.06);
+    padding-top: var(--spacing-md);
+  }
+
+  // Precio con estilo chip amarillo (estilo carta Massaro)
+  &__price {
+    font-family: var(--font-display);
+    font-size: 1.4rem;
+    letter-spacing: 1px;
+    background-color: var(--color-secondary);
+    color: var(--color-black);
+    padding: 4px 14px;
+    border-radius: var(--radius-pill);
+    line-height: 1;
+  }
+}

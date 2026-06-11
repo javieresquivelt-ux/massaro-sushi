@@ -1,0 +1,105 @@
+// ==========================================================================
+// Cabecera Superior (Header)
+// Barra de navegación con efecto glassmorphism
+// ==========================================================================
+
+.header {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background: color-mix(in srgb, var(--bg-color) 80%, transparent);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--border-color);
+  padding: var(--spacing-md) 0;
+
+  &__inner {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    position: relative;
+  }
+
+  &__logo {
+    text-decoration: none;
+    z-index: 101;
+    display: flex;
+    align-items: center;
+
+    // Logo real de Massaro Sushi
+    .header__logo-img {
+      height: 48px;
+      width: auto;
+      display: block;
+    }
+  }
+
+  // Estilos del botón Hamburguesa
+  &__toggle {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    z-index: 101;
+    padding: var(--spacing-sm);
+
+    .hamburger-line {
+      width: 25px;
+      height: 3px;
+      background-color: var(--text-color);
+      border-radius: var(--radius-pill);
+      transition: all 0.3s ease;
+    }
+
+    // Ocultar el botón en pantallas grandes
+    @media (min-width: 768px) {
+      display: none;
+    }
+  }
+
+  // Estilos de la navegación (Menú)
+  &__nav {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-lg);
+
+    // Diseño Móvil: Menú oculto lateral o desplegable
+    @media (max-width: 767px) {
+      position: absolute;
+      top: 100%;
+      left: 0;
+      right: 0;
+      background-color: var(--bg-color);
+      flex-direction: column;
+      padding: var(--spacing-xl) var(--spacing-md);
+      box-shadow: 0 10px 15px rgba(0, 0, 0, 0.1);
+      border-top: 1px solid var(--border-color);
+      
+      // Ocultar por defecto usando visibilidad y opacidad (mejor soporte)
+      opacity: 0;
+      visibility: hidden;
+      transform: translateY(-10px);
+      transition: all 0.3s ease-in-out;
+      
+      // Estado abierto controlado vía JS
+      &.is-open {
+        opacity: 1;
+        visibility: visible;
+        transform: translateY(0);
+      }
+    }
+  }
+
+  &__link {
+    color: var(--text-color);
+    font-weight: 500;
+    font-family: var(--font-heading);
+    transition: color 0.2s ease;
+
+    &:hover {
+      color: var(--color-primary);
+    }
+  }
+}

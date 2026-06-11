@@ -1,0 +1,28 @@
+@use '../abstracts/variables' as var;
+
+// ==========================================================================
+// Variables del Tema Oscuro (Dark Mode)
+// Sobrescribe las variables CSS cuando el data-theme es 'dark'
+// ==========================================================================
+
+[data-theme="dark"] {
+  // Colores de la marca
+  --color-primary: #{var.$color-red};
+  --color-secondary: #{var.$color-yellow};
+  --color-accent: #{var.$color-green};
+
+  // Fondos oscuros con tono verde-bambú
+  --bg-color: #{var.$color-green-dark};
+  --bg-color-alt: #{var.$color-gray-800};
+  
+  // Textos claros para contrastar
+  --text-color: #{var.$color-white};
+  --text-color-muted: #a1a1aa;
+  
+  // Bordes sutiles
+  --border-color: #2a3a2e;
+
+  // Tipografía
+  --font-display: #{var.$font-display};
+}
+

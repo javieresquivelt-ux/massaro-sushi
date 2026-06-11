@@ -1,0 +1,56 @@
+// ==========================================================================
+// Botones (Components)
+// Botones interactivos con micro-animaciones (Premium feel)
+// ==========================================================================
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--spacing-sm) var(--spacing-lg);
+  border-radius: var(--radius-pill);
+  font-family: var(--font-heading);
+  font-weight: 700;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+  border: none;
+  outline: none;
+  text-decoration: none;
+  
+  // Botón Primario (Llamada a la acción roja)
+  &--primary {
+    background-color: var(--color-primary);
+    color: #ffffff;
+    box-shadow: 0 4px 14px rgba(230, 0, 18, 0.3);
+    
+    &:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(230, 0, 18, 0.4);
+      background-color: color-mix(in srgb, var(--color-primary) 90%, black);
+    }
+    
+    &:active {
+      transform: translateY(1px);
+    }
+  }
+
+  // Botón Secundario (Amarillo para precios o alternativas)
+  &--secondary {
+    background-color: var(--color-secondary);
+    color: var(--color-black);
+    box-shadow: 0 4px 14px rgba(255, 196, 0, 0.3);
+    
+    &:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(255, 196, 0, 0.4);
+    }
+  }
+
+  // Botón Grande (para CTA del Hero)
+  &--large {
+    padding: var(--spacing-md) var(--spacing-2xl);
+    font-size: 1.15rem;
+    letter-spacing: 1px;
+  }
+}

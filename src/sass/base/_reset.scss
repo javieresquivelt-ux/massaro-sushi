@@ -1,0 +1,55 @@
+// ==========================================================================
+// Reseteo CSS Moderno
+// Elimina márgenes y paddings por defecto de los navegadores
+// ==========================================================================
+
+html {
+  scroll-behavior: smooth;
+}
+
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  min-height: 100vh;
+  min-height: 100dvh;
+  text-rendering: optimizeSpeed;
+  background-color: var(--bg-color);
+  color: var(--text-color);
+  overflow-x: hidden;
+  position: relative;
+  width: 100%;
+  // Fondo de bosque de bambú con overlay oscuro
+  background-image: 
+    linear-gradient(rgba(0, 0, 0, 0.65), rgba(0, 0, 0, 0.65)),
+    url('/src/assets/img/bg-bamboo.webp');
+  background-size: cover;
+  background-position: center;
+  @media (max-width: 768px) {
+    background-attachment: scroll;
+  }
+}
+
+img, picture, svg {
+  max-width: 100%;
+  display: block;
+}
+
+input, button, textarea, select {
+  font: inherit;
+}
+
+a {
+  text-decoration: none;
+  color: inherit;
+}
+
+ul, ol {
+  list-style: none;
+}

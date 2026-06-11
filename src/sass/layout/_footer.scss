@@ -1,0 +1,91 @@
+// ==========================================================================
+// Pie de Página (Footer)
+// Información del negocio: contacto, redes sociales y delivery
+// ==========================================================================
+
+.footer {
+  background: color-mix(in srgb, var(--bg-color-alt) 80%, transparent);
+  border-top: 1px solid var(--border-color);
+  padding: var(--spacing-xl) 0;
+  margin-top: auto;
+
+  &__inner {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-xl);
+  }
+
+  // Logo y nombre del negocio centrado
+  &__brand {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--spacing-sm);
+    padding-bottom: var(--spacing-xl);
+    border-bottom: 1px solid color-mix(in srgb, var(--color-primary) 30%, transparent);
+    margin-bottom: var(--spacing-md);
+  }
+
+  &__logo {
+    width: 64px;
+    height: 64px;
+    border-radius: var(--radius-md);
+    object-fit: cover;
+  }
+
+  &__name {
+    font-family: var(--font-display);
+    font-size: 1.8rem;
+    letter-spacing: 2px;
+    color: var(--color-white);
+  }
+
+  // Cuadrícula de información del negocio
+  &__info {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--spacing-xl);
+
+    @media (max-width: 768px) {
+      grid-template-columns: 1fr;
+      gap: var(--spacing-lg);
+    }
+  }
+
+  &__section-title {
+    font-family: var(--font-heading);
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--color-secondary);
+    margin-bottom: var(--spacing-md);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+
+  &__item {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+    color: var(--text-color-muted);
+    font-size: 0.9rem;
+    margin-bottom: var(--spacing-sm);
+
+    a {
+      color: var(--text-color-muted);
+      transition: color 0.2s ease;
+
+      &:hover {
+        color: var(--color-secondary);
+      }
+    }
+  }
+
+  // Línea inferior con copyright
+  &__bottom {
+    border-top: 1px solid var(--border-color);
+    padding-top: var(--spacing-lg);
+    text-align: center;
+    color: var(--text-color-muted);
+    font-size: 0.85rem;
+  }
+}

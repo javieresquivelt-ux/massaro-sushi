@@ -1,0 +1,63 @@
+@use '../abstracts/variables' as var;
+
+// ==========================================================================
+// Sección Hero (Portada de Bienvenida)
+// Logo grande, título impactante y CTA sobre fondo de bambú
+// ==========================================================================
+
+.hero {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 85vh;
+  min-height: 85dvh;
+  text-align: center;
+  padding: var(--spacing-2xl) var(--spacing-md);
+  position: relative;
+  width: 100%;
+  max-width: 100%;
+  overflow-x: hidden;
+
+  &__inner {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--spacing-lg);
+    max-width: 700px;
+    width: 100%;
+  }
+
+  // Logo grande y centrado
+  &__logo {
+    width: 220px;
+    height: auto;
+    border-radius: var(--radius-lg);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+
+    @media (max-width: 768px) {
+      width: 160px;
+    }
+  }
+
+  // Título con sombra dramática
+  &__title {
+    font-family: var(--font-display);
+    font-size: 4rem;
+    letter-spacing: 4px;
+    color: var(--color-white);
+    text-shadow: 0 0 30px rgba(220, 38, 38, 0.8), 2px 2px 0 #7f1d1d;
+    margin-bottom: 0;
+
+    @media (max-width: 768px) {
+      font-size: 2.8rem;
+    }
+  }
+
+  // Subtítulo con estilo suave
+  &__subtitle {
+    font-size: 1.15rem;
+    color: var(--text-color-muted);
+    max-width: 480px;
+    line-height: 1.6;
+  }
+}

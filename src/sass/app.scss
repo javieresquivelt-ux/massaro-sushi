@@ -1,0 +1,32 @@
+// ==========================================================================
+// Punto de Entrada Principal Sass (app.scss)
+// Orquestador del patrón 7-1
+// ==========================================================================
+
+// 1. Abstracts
+@use 'abstracts/variables' as var;
+
+// 2. Vendors (vacío por ahora)
+
+// 3. Base
+@use 'base/reset';
+@use 'base/typography';
+
+// 4. Layout
+@use 'layout/grid';
+@use 'layout/header';
+@use 'layout/footer';
+
+// 5. Components
+@use 'components/buttons';
+@use 'components/cards';
+@use 'components/tabs';
+@use 'components/floating-nav';
+
+// 6. Pages
+@use 'pages/hero';
+@use 'pages/catalog';
+
+// 7. Themes
+@use 'themes/light';
+@use 'themes/dark';
