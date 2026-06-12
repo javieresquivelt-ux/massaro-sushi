@@ -1,6 +1,6 @@
 # Memoria Persistente
 
-**Última actualización:** 2026-06-11
+**Última actualización:** 2026-06-12
 
 ## Decisiones Técnicas Consolidadas
 - **Stack Inicial**: Vanilla JS + Vite + Sass 7-1.
@@ -53,6 +53,7 @@
 ## Documentación y Control Operativo (Runbook)
 - **`infrastructure.md`**: Creado como fuente única de verdad para el despliegue. Define contenedores de EasyPanel, puertos obligatorios (API en 3000), variables de entorno `.env` permitidas y el uso de Trunk Based Development.
 - **Enlace de Conocimiento**: `specs.md` fue modificado para apuntar obligatoriamente a `infrastructure.md` como paso previo a codificar API o manejar servidores.
+- **`README.md`**: Documentado con objetivos del proyecto, estructura simplificada, secciones del sitio, tecnologías usadas (con badges) y autor.
 
 ### Favicon (Identidad de Pestaña)
 
@@ -63,6 +64,16 @@
 - Se eliminaron `public/favicon.svg` y `public/icons.svg` (íconos genéricos de Vite).
 - `index.html` actualizado: removido `<link>` SVG, añadidos 3 links con `sizes` y `rel` correctos.
 - Build de producción validado (716ms, sin errores).
+- Deploy manual en EasyPanel exitoso (commit `5478350`, build completado en ~7s).
+
+### Auditoría de `.gitignore` (2026-06-12)
+
+- Se realizó auditoría completa del `.gitignore`:
+  - **Añadido**: `/infrastructure.md` — contiene datos sensibles de deploy (puertos, variables de entorno)
+  - **Añadido**: `/agents.md`, `/specs.md`, `/init.sh` — archivos efímeros de agente que no deben committearse
+  - **Añadido**: `/requeriments/` — typo español del directorio `requirements/` existente en disco
+- No se detectaron `.env` ni secretos commiteados.
+- `template/` y `agent/` correctamente ignorados (assets de referencia y skills IA).
 
 ## Bugs Conocidos y Gotchas
 - **Bug de Menú Oculto en Móviles**: El uso de `clip-path` en contenedores con posicionamiento absoluto puede causar problemas de renderizado en algunos navegadores móviles (el menú no se muestra). *Solución*: Usar `opacity` y `visibility`.

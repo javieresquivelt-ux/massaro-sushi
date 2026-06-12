@@ -1,2 +1,63 @@
-# plantillas base
+# Dependencias
+node_modules
+.pnp
+.pnp.js
+
+# Build y producción (Vite)
+dist
+dist-ssr
+build/
+
+# Variables de Entorno (Crítico para seguridad en VPS)
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+*.local
+
+# Documentación de infraestructura (contiene datos sensibles de deploy)
+/infrastructure.md
+
+# Archivos de planificación y agente (efímeros, no deben committearse)
+/agents.md
+/specs.md
+/init.sh
+
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# Caché (Sass, Vite, ESLint futuro)
+.eslintcache
+.sass-cache/
+.vite/
+
+# Testing (futuro)
+coverage/
+
+# Directorios de Editor y Sistema Operativo
+.vscode/*
+!.vscode/extensions.json
+.idea
+.DS_Store
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# IDE agent-first (Antigravity/Gemini local data)
+.gemini/
+
+# Other Folders
+/requirements/
+/requeriments/   # typo existente del dir requirements
 /template/
+/agent/
+
