@@ -259,3 +259,10 @@
 - **Diagnóstico**: La propiedad `position: sticky` falla cuando un ancestro tiene una propiedad `overflow` que corta el flujo (como `hidden`, `auto`, o `scroll`). En este caso, tanto `.app-wrapper` (en `_grid.scss`) como `body` (en `_reset.scss`) tenían `overflow-x: hidden;`. Esto hacía que el header se "pegara" al contenedor `.app-wrapper` en lugar de a la ventana del navegador (viewport).
 - **Solución**: Se eliminó `overflow-x: hidden;` de `.app-wrapper` y `body`.
 - **Resultado**: El header ahora es verdaderamente fijo al hacer scroll en todas las resoluciones, manteniendo el carrito siempre accesible. Build OK.
+
+### Mejora UX: Microcopy LatAm (2026-06-14)
+- **Problema**: El término "Ir al Checkout" y la mención de "checkout" en el texto de envío generaban fricción. En LatAm (especialmente en pedidos por WhatsApp), "checkout" es un término técnico ajeno que además puede dar a entender un pago obligatorio e inmediato con tarjeta.
+- **Solución implementada**: 
+  - Se reemplazó el botón principal del carrito lateral por **"Continuar pedido"** (estándar de la industria en LatAm como PedidosYa, indica que viene un paso posterior y no un pago forzado).
+  - Se modificó la nota legal a: "Los costos de envío se calcularán en el siguiente paso".
+- **Resultado**: Tono más amigable, local y claro. Paso 4.7 completado.

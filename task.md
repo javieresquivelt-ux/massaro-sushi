@@ -449,6 +449,10 @@ checkout.js → setDeliveryMode('pickup')
 - [x] Modificar `cart-ui.js` para que deje de inyectar `getTotal()` en el drawer y dependa exclusivamente de `getSubtotal()`.
 - [x] Añadir una nota aclaratoria debajo del subtotal en el drawer que indique "Los costos de envío se calcularán en el checkout".
 
+### Paso 4.7 — Mejora UX: Microcopy LatAm
+- [x] Reemplazar el texto "Ir al Checkout" por "Continuar pedido" en el botón del carrito.
+- [x] Reemplazar el texto "se calcularán en el checkout" por "se calcularán en el siguiente paso".
+
 ### Paso 6 — Actualización de `init.sh` (39 checks)
 
 > **Objetivo**: Expandir el script de validación `init.sh` de 31 a 39 checks para cubrir los nuevos módulos JS, componentes Sass y skills IA de la Fase 2.
