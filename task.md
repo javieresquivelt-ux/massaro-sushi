@@ -466,6 +466,12 @@ checkout.js → setDeliveryMode('pickup')
 - [x] Actualizar `agent/skill-11-design-tokens.md` con reglas de Microcopy para LatAm.
 - [x] Actualizar `specs.md` para reflejar en el estado actual que se incluyeron optimizaciones UX Móvil.
 
+### Paso 4.11 — Extras y Modificadores (Paso 2.5 final)
+- [ ] Modificar `cart.js` para permitir inyección de precios personalizados (`customPrice`).
+- [ ] Modificar `modal.js` para renderizar un checkbox de "Cambio de relleno (+$1.000)" y alterar el nombre/precio de la variante elegida al agregar.
+- [ ] Añadir UI en `index.html` (al fondo del cart drawer) para "Salsas Extras (+$500)" como upsell.
+- [ ] Modificar `cart-ui.js` para escuchar el clic del botón de upsell e inyectar el producto `salsas-extras` en el carrito.
+
 ### Paso 6 — Actualización de `init.sh` (39 checks)
 
 > **Objetivo**: Expandir el script de validación `init.sh` de 31 a 39 checks para cubrir los nuevos módulos JS, componentes Sass y skills IA de la Fase 2.

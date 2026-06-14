@@ -286,3 +286,10 @@
   3. Se actualizó `specs.md` para reflejar estas integraciones en la Fase 2.
 - **Validación**: `init.sh` e `infrastructure.md` se mantuvieron sin cambios ya que no sufrieron alteraciones operativas. El Harness vuelve a estar 100% sincronizado.
 - **Validación**: Build OK (542ms), `./init.sh` 39/39 checks OK.
+
+### Arquitectura de Extras y Modificadores (2026-06-14)
+- **Problema Operativo**: Faltaba implementar los ítems del Paso 2.5: "Cambio de relleno (+$1.000)" y "Salsas extras (+$500)".
+- **Decisión de Diseño**:
+  1. Para evitar refactorizar toda la estructura del carrito, el "Cambio de relleno" no será un ítem separado, sino que se anexará al nombre de la variante elegida (ej. `Pollo (+ Cambio de relleno)`) y se pasará un `customPrice` modificado a `addToCart`.
+  2. Las "Salsas extras" se mostrarán como un panel de Upsell ("¿Algo más para tu pedido?") directamente en el cajón del carrito, inyectando el producto pre-existente `salsas-extras` de forma normal.
+- **Estado**: Plan registrado como **Paso 4.11**, pendiente de ejecución.
