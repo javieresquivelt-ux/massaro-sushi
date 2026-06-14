@@ -13,6 +13,14 @@ document.addEventListener('DOMContentLoaded', () => {
     menuToggle.addEventListener('click', () => {
       mainNav.classList.toggle('is-open');
     });
+
+    // UX: Cerrar el menú automáticamente al hacer click en cualquier enlace (One-Page navigation)
+    const navLinks = mainNav.querySelectorAll('a');
+    navLinks.forEach(link => {
+      link.addEventListener('click', () => {
+        mainNav.classList.remove('is-open');
+      });
+    });
   }
 
   initCart();

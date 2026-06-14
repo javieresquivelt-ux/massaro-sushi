@@ -457,7 +457,9 @@ checkout.js → setDeliveryMode('pickup')
 - [x] Eliminar el bloque `<nav class="floating-nav">` de `index.html`.
 - [x] Eliminar la importación `@use 'components/floating-nav';` en `app.scss`.
 - [x] Eliminar el archivo `src/sass/components/_floating-nav.scss`.
-- [x] **Validación**: `npm run build` + `./init.sh` → 39/39 checks OK.
+
+### Paso 4.9 — Mejora UX: Auto-cierre de Menú Hamburguesa
+- [x] Modificar `main.js` para que el menú móvil (`.is-open`) se cierre automáticamente cuando el usuario haga click en cualquier enlace (ej. "Pedir Ahora").
 
 ### Paso 6 — Actualización de `init.sh` (39 checks)
 
