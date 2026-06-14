@@ -453,6 +453,12 @@ checkout.js → setDeliveryMode('pickup')
 - [x] Reemplazar el texto "Ir al Checkout" por "Continuar pedido" en el botón del carrito.
 - [x] Reemplazar el texto "se calcularán en el checkout" por "se calcularán en el siguiente paso".
 
+### Paso 4.8 — Mejora UX: Eliminación de Navegación Flotante
+- [x] Eliminar el bloque `<nav class="floating-nav">` de `index.html`.
+- [x] Eliminar la importación `@use 'components/floating-nav';` en `app.scss`.
+- [x] Eliminar el archivo `src/sass/components/_floating-nav.scss`.
+- [x] **Validación**: `npm run build` + `./init.sh` → 39/39 checks OK.
+
 ### Paso 6 — Actualización de `init.sh` (39 checks)
 
 > **Objetivo**: Expandir el script de validación `init.sh` de 31 a 39 checks para cubrir los nuevos módulos JS, componentes Sass y skills IA de la Fase 2.

@@ -266,3 +266,13 @@
   - Se reemplazó el botón principal del carrito lateral por **"Continuar pedido"** (estándar de la industria en LatAm como PedidosYa, indica que viene un paso posterior y no un pago forzado).
   - Se modificó la nota legal a: "Los costos de envío se calcularán en el siguiente paso".
 - **Resultado**: Tono más amigable, local y claro. Paso 4.7 completado.
+
+### Mejora UX: Eliminación de Navegación Flotante ✅
+- **Problema detectado**: Con la reparación del header para que sea "sticky" de forma correcta (visible el 100% del tiempo), la botonera flotante inferior (`.floating-nav` con "Inicio" y "Menú") en móviles se volvió completamente redundante.
+- **Análisis**: Esta redundancia generaba desperdicio de espacio vertical vital en pantallas pequeñas, tapando parte de las tarjetas de productos sin aportar valor extra, ya que el header superior ya contiene el ancla al inicio (logo) y acceso al menú de navegación.
+- **Decisión de Diseño**: Eliminar de raíz la botonera flotante.
+- **Ejecutado**:
+  - `index.html`: Eliminado bloque `<nav class="floating-nav">`.
+  - `app.scss`: Eliminada línea `@use 'components/floating-nav';`.
+  - `src/sass/components/_floating-nav.scss`: Archivo eliminado.
+- **Validación**: Build OK (542ms), `./init.sh` 39/39 checks OK.
