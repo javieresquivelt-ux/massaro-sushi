@@ -32,6 +32,15 @@
             <span class="hamburger-line"></span>
           </button>
 
+          <!-- Carrito Icono con Badge -->
+          <button class="cart-toggle" id="cart-toggle" aria-label="Abrir carrito">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/>
+              <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/>
+            </svg>
+            <span class="cart-toggle__badge" id="cart-badge" aria-hidden="true">0</span>
+          </button>
+
           <!-- Navegación Principal -->
           <nav class="header__nav" id="main-nav">
             <a href="#menu" class="header__link">Menú</a>
@@ -149,6 +158,96 @@
       
     </div>
     
+    <!-- Sección de Checkout -->
+    <section class="checkout-section" id="checkout-section" style="display:none;">
+      <div class="checkout-overlay" id="checkout-overlay"></div>
+      <div class="checkout-panel">
+        <div class="checkout-panel__header">
+          <h2 class="checkout-panel__title">Finalizar Pedido</h2>
+          <button class="checkout-panel__close" id="checkout-back-btn" aria-label="Volver al carrito">&larr; Volver</button>
+        </div>
+        <div class="checkout-panel__body">
+          <!-- Segmented Control: Delivery vs Retiro -->
+          <div class="checkout__delivery-mode">
+            <button class="delivery-mode-btn delivery-mode-btn--active" data-mode="delivery">🛵 Delivery</button>
+            <button class="delivery-mode-btn" data-mode="pickup">🏪 Retiro en Local</button>
+          </div>
+
+          <div class="checkout__summary">
+            <h3 class="checkout__summary-title">Resumen del Pedido</h3>
+            <div class="checkout__items" id="checkout-items"></div>
+            <div class="checkout__summary-line">
+              <span>Subtotal</span>
+              <span class="checkout__summary-value" id="checkout-subtotal">$0</span>
+            </div>
+            <div class="checkout__summary-line checkout__summary-line--delivery">
+              <span>Despacho Quilicura</span>
+              <span class="checkout__summary-value">$2.000</span>
+            </div>
+            <div class="checkout__summary-line checkout__summary-line--total">
+              <span>Total</span>
+              <span class="checkout__summary-value" id="checkout-total">$2.000</span>
+            </div>
+          </div>
+
+          <form class="checkout__form" id="checkout-form" novalidate>
+            <label class="checkout__field">
+              <span class="checkout__label">Nombre *</span>
+              <input type="text" class="checkout__input" id="checkout-name" placeholder="Tu nombre" required />
+            </label>
+            <label class="checkout__field checkout__field--address">
+              <span class="checkout__label">Dirección en Quilicura *</span>
+              <input type="text" class="checkout__input" id="checkout-address" placeholder="Calle, número, villa" required />
+            </label>
+            <label class="checkout__field">
+              <span class="checkout__label">Notas (opcional)</span>
+              <textarea class="checkout__input checkout__input--textarea" id="checkout-notes" placeholder="Ej: sin palillos, portón reja..."></textarea>
+            </label>
+            <p class="checkout__error" id="checkout-error" style="display:none;"></p>
+            <button type="button" class="btn btn--primary checkout__send-btn" id="checkout-send-btn">Enviar Pedido por WhatsApp</button>
+          </form>
+        </div>
+      </div>
+    </section>
+
+    <!-- Modal de Selección de Variantes -->
+    <div class="modal-overlay" id="variant-modal-overlay">
+      <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+        <div class="modal__header">
+          <h2 class="modal__title" id="modal-title">Elige tu relleno</h2>
+          <button class="modal__close" id="modal-close" aria-label="Cerrar">&times;</button>
+        </div>
+        <div class="modal__body"></div>
+        <div class="modal__footer">
+          <button class="btn btn--primary modal__add-btn" id="modal-add-btn">Agregar al Carrito</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Overlay del Carrito -->
+    <div class="cart-overlay" id="cart-overlay"></div>
+
+    <!-- Drawer del Carrito Lateral -->
+    <aside class="cart-drawer" id="cart-drawer" aria-label="Carrito de compras">
+      <div class="cart-drawer__header">
+        <h2 class="cart-drawer__title">Tu Pedido</h2>
+        <button class="cart-drawer__close" id="cart-drawer-close" aria-label="Cerrar carrito">&times;</button>
+      </div>
+      <div class="cart-drawer__body" id="cart-drawer-body">
+        <div class="cart-drawer__empty">Tu carrito está vacío</div>
+      </div>
+      <div class="cart-drawer__footer" id="cart-drawer-footer" style="display:none;">
+        <div class="cart-drawer__summary">
+          <div class="cart-drawer__summary-line cart-drawer__summary-line--total">
+            <span>Subtotal</span>
+            <span class="cart-drawer__summary-value" id="cart-subtotal">$0</span>
+          </div>
+          <p class="cart-drawer__note" style="font-size: 0.85rem; color: var(--color-text-muted, #a0a0a0); margin-top: 0.5rem; text-align: right; margin-bottom: 0;">Los costos de envío se calcularán en el checkout</p>
+        </div>
+        <button class="btn btn--primary cart-drawer__checkout-btn" id="cart-checkout-btn">Ir al Checkout</button>
+      </div>
+    </aside>
+
     <!-- Punto de entrada principal de JavaScript para Vite -->
     <script type="module" src="/src/main.js"></script>
   </body>

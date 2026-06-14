@@ -17,7 +17,6 @@ export const categories = [
   { id: 'hard-rolls', name: 'Hard Rolls' },
   { id: 'al-plato', name: 'Al Plato' },
   { id: 'tabla-massaro', name: 'Tabla Massaro' },
-  { id: 'adicionales', name: 'Adicionales' },
 ];
 
 export const products = [
@@ -413,7 +412,7 @@ export const products = [
     name: 'Salsas extras',
     description: 'Porción adicional de salsa clásica Massaro.',
     price: 500,
-    category: 'adicionales',
+    category: '_hidden',
     image: imgAdicionales,
   },
   {
@@ -421,7 +420,7 @@ export const products = [
     name: 'Cambio de relleno',
     description: 'Personaliza tu roll cambiando el relleno estándar.',
     price: 1000,
-    category: 'adicionales',
+    category: '_hidden',
     image: imgAdicionales,
   },
   {
@@ -429,13 +428,13 @@ export const products = [
     name: 'Despacho dentro de Quilicura',
     description: 'Delivery directo a tu hogar en Quilicura.',
     price: 2000,
-    category: 'adicionales',
+    category: '_hidden',
     image: imgAdicionales,
   },
 ];
 
 export function getProductsByCategory(categoryId) {
-  if (!categoryId) return products;
+  if (!categoryId) return products.filter(p => p.category !== '_hidden');
   return products.filter(p => p.category === categoryId);
 }
 

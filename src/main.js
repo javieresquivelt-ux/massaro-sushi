@@ -1,5 +1,9 @@
 import './sass/app.scss'
 import { initTabs } from './js/catalog.js'
+import { initCart } from './js/cart.js'
+import { initCartUI } from './js/cart-ui.js'
+import { initModal } from './js/modal.js'
+import { initCheckout } from './js/checkout.js'
 
 document.addEventListener('DOMContentLoaded', () => {
   const menuToggle = document.getElementById('menu-toggle');
@@ -11,5 +15,9 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
+  initCart();
+  initCartUI();
+  initModal();
+  initCheckout();
   initTabs();
 });

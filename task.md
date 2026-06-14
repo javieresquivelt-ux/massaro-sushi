@@ -370,3 +370,133 @@
 - [x] **4. Limpieza y Validación**
   - [x] Borrar los archivos `public/favicon.svg` y `public/icons.svg` residuales de Vite.
   - [x] Ejecutar `npm run build` → build sin errores (716ms).
+
+---
+
+## 🛒 Fase 2: Interactividad, Carrito y Pedidos (MVP Funcional)
+
+> **Objetivo**: Dotar a la página de la lógica necesaria para que los clientes puedan armar su pedido y enviarlo directamente al WhatsApp del local, minimizando la fricción y sin necesidad de un backend complejo en esta etapa inicial.
+
+### Paso 1 — Lógica de Estado (Carrito)
+- [x] Definir estructura de datos para el carrito (ítems, cantidades, opciones de relleno, subtotal).
+- [x] Implementar funciones puras en JS para agregar, eliminar y modificar cantidades de productos.
+- [x] Sincronizar el estado del carrito con `localStorage` para no perder el pedido al recargar la página.
+- [x] Integrar botón "Agregar" con event delegation en `catalog.js`.
+- [x] Emitir Custom Event `cart:updated` para comunicación desacoplada entre módulos.
+
+### Paso 2 — Interfaz de Usuario (UI) del Carrito
+- [x] Crear componente visual de "Carrito Lateral" (Drawer/Sidebar) deslizable.
+- [x] Actualizar dinámicamente un contador de ítems numérico en el ícono del Header.
+- [x] Diseñar las tarjetas de producto dentro del carrito (miniatura, título, variante elegida, +/- cantidad, precio total).
+
+### Paso 2.5 — Refactorización UX: Adicionales y Costos Operativos
+- [x] Eliminar la categoría "Adicionales" del catálogo visible y de los tabs de filtrado (`menu.js`).
+- [ ] Convertir "Cambio de relleno" en un modificador con recargo (+$1.000) dentro del flujo de selección de variantes. *(Se implementará en Paso 3 — Modal de variantes)*
+- [ ] Implementar "Salsas extras" como una sección de *upsell* (¿Algo más para tu pedido?) en el drawer del carrito antes del checkout. *(Se implementará junto con el checkout)*
+- [x] Incorporar el "Despacho dentro de Quilicura" ($2.000) como una línea fija y automática en el resumen del pedido (subtotal + delivery = total). *(Ya implementado en cart.js y cart-ui.js)*
+
+### Paso 3 — Flujo de Selección de Variantes
+- [x] Crear modal de configuración para productos como los "Rolls a la carta", donde se debe elegir obligatoriamente el tipo de relleno antes de agregarlo al carro.
+- [x] Gestionar validaciones visuales de campos requeridos en la UI.
+
+### Paso 4 — Checkout y Envío a WhatsApp
+- [x] Crear sección de "Checkout" solicitando: Nombre del cliente, Dirección de despacho (Quilicura) y Notas (ej. "sin palillos").
+- [x] Calcular sumatoria final incluyendo automáticamente el ítem "Despacho ($2.000)".
+- [x] Construir un formateador de strings que convierta el pedido en un texto ordenado para WhatsApp.
+- [x] Programar el botón final para redirigir a `wa.me/56972377458?text=...` con el mensaje codificado en la URL.
+
+### Paso 4.5 — Mejora UX: Retiro en Local vs Delivery
+
+> **Objetivo**: Permitir al cliente elegir entre Delivery ($2.000) y Retiro en Local ($0) durante el checkout.
+> **Decisiones acordadas**: Modo en `cart.js` (estado centralizado), no persiste en localStorage (siempre empieza en Delivery), drawer sincronizado via `cart:updated`.
+
+#### Archivos a modificar:
+
+- [x] **`src/js/cart.js`** — Agregar:
+  - Variable `let deliveryMode = 'delivery'` (default)
+  - Exportar `setDeliveryMode(mode)` — cambia modo y emite `cart:updated`
+  - Exportar `getDeliveryMode()` — retorna modo actual
+  - Modificar `getTotal()`: si `deliveryMode === 'pickup'`, retorna solo subtotal (sin `deliveryFee`)
+
+- [x] **`index.html`** — Añadir contenedor para el segmented control en la sección checkout.
+  - Añadida clase `checkout__field--address` al campo dirección para ocultarlo dinámicamente.
+  - Añadida clase `checkout__summary-line--delivery` a la línea de despacho para ocultarla en Retiro.
+
+- [x] **`src/sass/components/_checkout.scss`** — Agregar estilos para `.checkout__delivery-mode` y `.delivery-mode-btn` (dos botones lado a lado, estilo píldora, activo rojo con texto amarillo, inactivo oscuro translúcido).
+
+- [x] **`src/js/checkout.js`** — Modificar:
+  - `initDeliveryModeButtons()`: sincroniza botón activo, escucha clicks, llama a `setDeliveryMode()`
+  - `toggleAddressField(mode)`: oculta campo dirección si `pickup`
+  - `renderCheckoutSummary()`: oculta línea de despacho si `pickup`
+  - `sendWhatsApp()`: solo valida dirección si `delivery`
+  - `buildWhatsAppMessage()`: incluye `🛵 Delivery + dirección` o `🏪 Retiro en Local` según el modo
+
+#### Flujo de datos:
+```
+checkout.js → setDeliveryMode('pickup')
+            → cart.js: deliveryMode cambia
+            → notifyCartChange() → cart:updated
+            → cart-ui.js: updateBadge() + renderCartItems() (si drawer abierto, se sincroniza solo)
+            → checkout.js: recalcula resumen + oculta dirección
+```
+
+#### Mensaje WhatsApp (nuevo formato):
+- Delivery: `🛵 Delivery\n📍 Dirección: Los Olivos 123`
+- Retiro: `🏪 Retiro en Local`
+
+### Paso 4.6 — Mejora UX: Postergación del Costo de Despacho al Checkout
+- [x] Eliminar la línea estática de "Despacho Quilicura" del `<div class="cart-drawer__summary">` en `index.html`.
+- [x] Modificar `cart-ui.js` para que deje de inyectar `getTotal()` en el drawer y dependa exclusivamente de `getSubtotal()`.
+- [x] Añadir una nota aclaratoria debajo del subtotal en el drawer que indique "Los costos de envío se calcularán en el checkout".
+
+### Paso 6 — Actualización de `init.sh` (39 checks)
+
+> **Objetivo**: Expandir el script de validación `init.sh` de 31 a 39 checks para cubrir los nuevos módulos JS, componentes Sass y skills IA de la Fase 2.
+> **Razonamiento**: `init.sh` verificaba solo la estructura de la Fase 1. Con los nuevos archivos (`cart.js`, `cart-ui.js`, `modal.js`, `checkout.js`, `_cart-drawer.scss`, `_modal.scss`, `_checkout.scss`, `agent/README.md`), el script debe garantizar que todos los componentes del MVP funcional están presentes antes de compilar.
+
+- [x] **`init.sh`** — Añadidos 8 nuevos checks:
+  - [x] Módulos JS: `cart.js`, `cart-ui.js`, `modal.js`, `checkout.js`.
+  - [x] Componentes Sass: `_cart-drawer.scss`, `_modal.scss`, `_checkout.scss`.
+  - [x] Skills IA: `agent/README.md`.
+- [x] **Validación**: `./init.sh` → 39/39 checks pasados, 0 fallos, 0 advertencias.
+
+### Paso 7 — Actualización de `specs.md` e `infrastructure.md`
+
+> **Objetivo**: Sincronizar la documentación técnica con el estado actual del proyecto tras la Fase 2.
+> **Diagnóstico**: Ambos archivos están desactualizados respecto a los nuevos módulos JS (carrito, modal, checkout), componentes Sass, el selector Delivery/Retiro y el contador de checks de `init.sh`.
+
+- [x] **`specs.md`** — Actualizado:
+  - [x] Fecha de revisión a 2026-06-13.
+  - [x] Estructura de archivos con nuevos JS (`cart.js`, `cart-ui.js`, `modal.js`, `checkout.js`) y Sass (`_cart-drawer`, `_modal`, `_checkout`).
+  - [x] Tabla de diferencias actualizada con componentes y módulos de Fase 2.
+  - [x] `init.sh` de 14 a 39 checks.
+  - [x] Frontend responsabilidades actualizadas con carrito, checkout y Delivery/Retiro.
+  - [x] Fases de implementación reordenadas (Fase 2 completada marcada).
+  - [x] Checklist de despliegue dividido por capas con checks de Fase 2.
+
+- [x] **`infrastructure.md`** — Actualizado:
+  - [x] Descripción del servicio frontend con stack, módulos JS, componentes Sass y características.
+  - [x] Checklist de QA con sub-sección "Frontend — Funcional (Fase 2)" con 7 checks detallados.
+
+### Paso 8 — Actualización de Skills IA en `agent/`
+
+> **Objetivo**: Sincronizar los skills de la carpeta `agent/` con las lecciones aprendidas durante la Fase 2.
+> **Diagnóstico**: Auditados los 11 skills + `README.md`. 3 skills necesitan actualización, 1 con cambio menor.
+
+- [x] **`agent/README.md`** — Actualizado: Fase 2 de "En progreso" a "Completada".
+- [x] **`agent/skill-05-cart-architecture.md`** — Actualizado: `deliveryMode`, `cart-ui.js`, `notifyCartChange()`, evento `cart:updated`, `modal.js`, `buildWhatsAppMessage()` con modo Delivery/Retiro.
+- [x] **`agent/skill-10-js-module-pattern.md`** — Actualizado: estructura `src/js/` con 5 módulos, ejemplo `main.js` real, patrón separación UI/Estado, tabla de eventos Custom Events.
+- [x] **`agent/skill-03-deploy-easypanel.md`** — Actualizado (menor): "31/31 checks" → "39/39 checks".
+
+### Paso 5 — Revisión de Deuda Técnica
+- [x] Evaluar la mantenibilidad del código en Vanilla JS tras implementar esta lógica de estado.
+  - Módulos: `cart.js` (~100 líneas), `cart-ui.js` (~145 líneas), `modal.js` (~85 líneas), `checkout.js` (~95 líneas). Todos bajo el límite de 200-300 líneas.
+  - Comunicación desacoplada via Custom Events (`cart:updated`, `modal:open-variant`).
+  - Sin bugs de re-renderización identificados en pruebas manuales.
+  - **Conclusión**: No se requiere migración a React/Vue en esta etapa. Vanilla JS + Custom Events es suficiente para el MVP.
+
+### 🐛 Corrección — Botones "Agregar" no funcionales en Promos y ciertos productos
+- [x] **Diagnóstico**: El event delegation en `catalog.js` busca `btn.closest('[data-product-id]')`. Las promos (`.promo-card`) **no tienen** `data-product-id`, por lo que el flujo se corta en la línea 166 y nunca llega a `handleAddToCart()`. Los productos regulares sí lo tienen en el `<article class="card">` y funcionan correctamente.
+- [x] **Solución**: Añadido `data-product-id="${promo.id}"` al `<article class="promo-card">` en `renderCatalog()` de `catalog.js`.
+- [x] **Bug real descubierto**: `updateBadge()` en `cart-ui.js` estaba dentro del bloque `if (isOpen)`. Al agregar un producto con el drawer cerrado, `isOpen = false`, por lo que el badge nunca se actualizaba. **Solución**: `updateBadge()` se ejecuta siempre, fuera del `if`.
+- [x] **Bug badge invisible**: `position: absolute` del badge se calculaba incorrectamente por el `position: sticky` del header. **Solución**: Eliminado `position: absolute`, ahora usa flujo normal flexbox. El drawer se abre automáticamente al agregar un producto para dar feedback inmediato.

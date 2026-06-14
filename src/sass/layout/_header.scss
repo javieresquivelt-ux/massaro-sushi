@@ -103,3 +103,46 @@
     }
   }
 }
+
+// ==========================================================================
+// Ícono del Carrito en Header
+// ==========================================================================
+.cart-toggle {
+  position: relative;
+  background: none;
+  border: none;
+  color: var(--color-text);
+  cursor: pointer;
+  padding: 0.35rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: color 0.2s;
+  z-index: 101;
+  order: 1;
+
+  @media (min-width: 768px) {
+    order: 0;
+  }
+
+  &:hover {
+    color: var(--color-secondary);
+  }
+}
+
+.cart-toggle__badge {
+  display: none;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 6px;
+  background: #dc2626;
+  color: #fff;
+  font-size: 0.75rem;
+  font-weight: 700;
+  line-height: 20px;
+  text-align: center;
+  border-radius: 10px;
+  font-family: var(--font-heading);
+  pointer-events: none;
+  border: 2px solid #0d1f15;
+}

@@ -1,0 +1,162 @@
+// ==========================================================================
+// Componente: Modal de Selección de Variantes
+// Overlay centrado para elegir relleno en Rolls a la Carta
+// ==========================================================================
+
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.7);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.25s ease, visibility 0.25s ease;
+
+  &.is-visible {
+    opacity: 1;
+    visibility: visible;
+  }
+}
+
+.modal {
+  background: rgba(15, 18, 15, 0.98);
+  backdrop-filter: blur(16px);
+  border: 1px solid rgba(230, 0, 18, 0.25);
+  border-radius: var(--radius-lg);
+  width: min(440px, 100%);
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6);
+  transform: scale(0.95) translateY(10px);
+  transition: transform 0.25s ease;
+
+  .modal-overlay.is-visible & {
+    transform: scale(1) translateY(0);
+  }
+}
+
+.modal__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1.25rem 1.5rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.modal__title {
+  font-family: var(--font-display);
+  font-size: 1.35rem;
+  letter-spacing: 1px;
+  color: var(--color-text);
+  margin: 0;
+}
+
+.modal__close {
+  background: none;
+  border: none;
+  color: var(--color-text-muted);
+  font-size: 1.5rem;
+  cursor: pointer;
+  padding: 0.25rem;
+  line-height: 1;
+  transition: color 0.2s;
+
+  &:hover {
+    color: var(--color-primary);
+  }
+}
+
+.modal__body {
+  padding: 1.25rem 1.5rem;
+}
+
+.modal__product-name {
+  font-family: var(--font-heading);
+  font-size: 1rem;
+  color: var(--color-text);
+  margin: 0 0 0.25rem;
+}
+
+.modal__product-price {
+  font-family: var(--font-display);
+  font-size: 1.15rem;
+  color: var(--color-secondary);
+  margin-bottom: 1rem;
+}
+
+.modal__variants-label {
+  font-size: 0.85rem;
+  color: var(--color-text-muted);
+  margin-bottom: 0.75rem;
+  display: block;
+}
+
+.modal__variants {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.modal__variant {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.7rem 1rem;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: background 0.2s, border-color 0.2s;
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.08);
+  }
+
+  &.is-selected {
+    border-color: var(--color-secondary);
+    background: rgba(255, 183, 0, 0.08);
+  }
+}
+
+.modal__variant-input {
+  accent-color: var(--color-secondary);
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+}
+
+.modal__variant-info {
+  flex: 1;
+}
+
+.modal__variant-name {
+  font-size: 0.9rem;
+  color: var(--color-text);
+}
+
+.modal__variant-price {
+  font-family: var(--font-display);
+  font-size: 0.95rem;
+  color: var(--color-secondary);
+  margin-left: auto;
+}
+
+.modal__footer {
+  padding: 0 1.5rem 1.5rem;
+}
+
+.modal__add-btn {
+  width: 100%;
+  padding: 0.85rem;
+  font-family: var(--font-heading);
+  font-size: 1rem;
+
+  &:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+  }
+}

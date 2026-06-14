@@ -1,4 +1,5 @@
 import { products, categories, getProductsByCategory, formatPrice } from '../data/menu.js';
+import { addToCart } from './cart.js';
 
 function renderTabs(container) {
   const allTab = document.createElement('button');
@@ -56,7 +57,7 @@ export function renderCatalog(gridContainer, categoryId = null) {
         : '';
 
       return `
-        <article class="card" data-category="${product.category}">
+        <article class="card" data-category="${product.category}" data-product-id="${product.id}">
           <div class="card__image-wrapper">
             <img src="${product.image}" alt="${product.name}" class="card__image" loading="lazy" />
             ${badgeHtml}
@@ -80,7 +81,7 @@ export function renderCatalog(gridContainer, categoryId = null) {
   if (promos.length) {
     html += `<div class="catalog__promos">`;
     html += promos.map(promo => `
-      <article class="promo-card">
+      <article class="promo-card" data-product-id="${promo.id}">
         <div class="promo-card__image-wrapper">
           <img src="${promo.image}" alt="${promo.name}" class="promo-card__image" loading="lazy" />
           <span class="promo-card__pieces">${promo.pieces} pz.</span>
@@ -99,6 +100,19 @@ export function renderCatalog(gridContainer, categoryId = null) {
   }
 
   gridContainer.innerHTML = html;
+}
+
+function handleAddToCart(productId) {
+  const product = products.find(p => p.id === productId);
+  if (!product) return;
+
+  const hasVariants = product.variants && product.variants.length > 0;
+
+  if (hasVariants) {
+    document.dispatchEvent(new CustomEvent('modal:open-variant', { detail: { product } }));
+  } else {
+    addToCart(product);
+  }
 }
 
 export function initTabs() {
@@ -143,4 +157,15 @@ export function initTabs() {
       renderCatalog(gridContainer, category || null);
     });
   }
+
+  // Event delegation for "Agregar" buttons
+  gridContainer.addEventListener('click', (e) => {
+    const btn = e.target.closest('.btn--primary');
+    if (!btn) return;
+
+    const card = btn.closest('[data-product-id]');
+    if (!card) return;
+
+    handleAddToCart(card.dataset.productId);
+  });
 }
