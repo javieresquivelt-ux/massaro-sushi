@@ -461,6 +461,11 @@ checkout.js → setDeliveryMode('pickup')
 ### Paso 4.9 — Mejora UX: Auto-cierre de Menú Hamburguesa
 - [x] Modificar `main.js` para que el menú móvil (`.is-open`) se cierre automáticamente cuando el usuario haga click en cualquier enlace (ej. "Pedir Ahora").
 
+### Paso 4.10 — Consolidación de Skills IA y Specs
+- [x] Actualizar `agent/skill-07-responsive-design.md` con lecciones sobre UX Móvil (One-Page auto-cierre, redundancia de botonera, bugs de `overflow-x` y `sticky`).
+- [x] Actualizar `agent/skill-11-design-tokens.md` con reglas de Microcopy para LatAm.
+- [x] Actualizar `specs.md` para reflejar en el estado actual que se incluyeron optimizaciones UX Móvil.
+
 ### Paso 6 — Actualización de `init.sh` (39 checks)
 
 > **Objetivo**: Expandir el script de validación `init.sh` de 31 a 39 checks para cubrir los nuevos módulos JS, componentes Sass y skills IA de la Fase 2.
