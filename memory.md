@@ -271,8 +271,18 @@
 - **Problema detectado**: Con la reparación del header para que sea "sticky" de forma correcta (visible el 100% del tiempo), la botonera flotante inferior (`.floating-nav` con "Inicio" y "Menú") en móviles se volvió completamente redundante.
 - **Análisis**: Esta redundancia generaba desperdicio de espacio vertical vital en pantallas pequeñas, tapando parte de las tarjetas de productos sin aportar valor extra, ya que el header superior ya contiene el ancla al inicio (logo) y acceso al menú de navegación.
 - **Decisión de Diseño**: Eliminar de raíz la botonera flotante.
-- **Ejecutado**:
-  - `index.html`: Eliminado bloque `<nav class="floating-nav">`.
-  - `app.scss`: Eliminada línea `@use 'components/floating-nav';`.
-  - `src/sass/components/_floating-nav.scss`: Archivo eliminado.
+- **Ejecutado**: Eliminado bloque `<nav class="floating-nav">` de `index.html` y componente Sass. Paso 4.8 completado.
+
+### Mejora UX: Auto-cierre del Menú Hamburguesa (2026-06-14)
+- **Problema**: Al abrir el menú de hamburguesa en móvil y hacer clic en un ancla ("Pedir Ahora"), la pantalla se desplazaba al catálogo, pero el menú superpuesto no se cerraba, obligando al usuario a cerrarlo manualmente ("doble clic mental").
+- **Solución implementada**: Se añadió un event listener a cada enlace `<a>` dentro de `mainNav` en `main.js`. Ahora, al hacer clic en cualquier enlace interno, la clase `.is-open` se remueve automáticamente.
+- **Resultado**: Navegación fluida ("One-Page Experience"), donde el menú desaparece de inmediato tras la interacción. Paso 4.9 completado.
+
+### Consolidación Documental y de Skills IA (2026-06-14)
+- **Problema**: Las recientes lecciones de UX Móvil y Microcopy no estaban documentadas en los "skills" del agente, lo que podía llevar a futuros errores.
+- **Acción (Ejecutada)**: Se aprobó y ejecutó el Plan Documental (Paso 4.10):
+  1. Se actualizó `skill-07-responsive-design.md` documentando el bug de `overflow-x` afectando a `position: sticky`, la regla del auto-cierre del menú hamburguesa, y el principio de "Conservation of Real Estate" para evitar botoneras redundantes.
+  2. Se actualizó `skill-11-design-tokens.md` incorporando la sección "Microcopy LatAm" (evitar la palabra Checkout, usar "Continuar pedido").
+  3. Se actualizó `specs.md` para reflejar estas integraciones en la Fase 2.
+- **Validación**: `init.sh` e `infrastructure.md` se mantuvieron sin cambios ya que no sufrieron alteraciones operativas. El Harness vuelve a estar 100% sincronizado.
 - **Validación**: Build OK (542ms), `./init.sh` 39/39 checks OK.
