@@ -1,7 +1,8 @@
 const STORAGE_KEY = 'massaro-cart';
 const DELIVERY_FEE = 2000;
+const CUSTOMIZATION_FEE = 1000;
 
-let deliveryMode = 'delivery'; // 'delivery' | 'pickup'
+let deliveryMode = 'delivery';
 
 export function setDeliveryMode(mode) {
   deliveryMode = mode;
@@ -13,13 +14,17 @@ export function getDeliveryMode() {
 }
 
 function getInitialState() {
-  return { items: [], deliveryFee: DELIVERY_FEE };
+  return { items: [], deliveryFee: DELIVERY_FEE, salsas: [], customizationNote: '' };
 }
 
 function loadCart() {
   try {
     const data = localStorage.getItem(STORAGE_KEY);
-    return data ? JSON.parse(data) : getInitialState();
+    if (!data) return getInitialState();
+    const parsed = JSON.parse(data);
+    parsed.salsas = parsed.salsas || [];
+    parsed.customizationNote = parsed.customizationNote || '';
+    return parsed;
   } catch {
     return getInitialState();
   }
@@ -43,7 +48,12 @@ export function initCart() {
 }
 
 export function getCart() {
-  return { ...state, items: state.items.map(item => ({ ...item })) };
+  return {
+    ...state,
+    items: state.items.map(item => ({ ...item })),
+    salsas: state.salsas.map(s => ({ ...s })),
+    customizationNote: state.customizationNote,
+  };
 }
 
 export function addToCart(product, variantName = null) {
@@ -100,11 +110,54 @@ export function getSubtotal() {
   return state.items.reduce((acc, item) => acc + item.price * item.quantity, 0);
 }
 
+export function getSalsaTotal() {
+  return state.salsas.reduce((acc, s) => acc + s.price * s.quantity, 0);
+}
+
 export function getTotal() {
-  if (deliveryMode === 'pickup') return getSubtotal();
-  return getSubtotal() + state.deliveryFee;
+  let total = getSubtotal() + getSalsaTotal();
+  if (deliveryMode !== 'pickup') total += state.deliveryFee;
+  if (state.customizationNote) total += CUSTOMIZATION_FEE;
+  return total;
 }
 
 export function getItemCount() {
   return state.items.reduce((acc, item) => acc + item.quantity, 0);
+}
+
+export function addSalsa(salsaId, salsaName, salsaPrice) {
+  const existing = state.salsas.find(s => s.id === salsaId);
+  if (existing) {
+    existing.quantity += 1;
+  } else {
+    state.salsas.push({ id: salsaId, name: salsaName, price: salsaPrice, quantity: 1 });
+  }
+  saveCart(state);
+  notifyCartChange();
+}
+
+export function removeSalsa(salsaId) {
+  const existing = state.salsas.find(s => s.id === salsaId);
+  if (!existing) return;
+  if (existing.quantity > 1) {
+    existing.quantity -= 1;
+  } else {
+    state.salsas = state.salsas.filter(s => s.id !== salsaId);
+  }
+  saveCart(state);
+  notifyCartChange();
+}
+
+export function getSalsas() {
+  return state.salsas.map(s => ({ ...s }));
+}
+
+export function setCustomizationNote(note) {
+  state.customizationNote = note;
+  saveCart(state);
+  notifyCartChange();
+}
+
+export function getCustomizationNote() {
+  return state.customizationNote;
 }

@@ -391,8 +391,8 @@
 
 ### Paso 2.5 — Refactorización UX: Adicionales y Costos Operativos
 - [x] Eliminar la categoría "Adicionales" del catálogo visible y de los tabs de filtrado (`menu.js`).
-- [ ] Convertir "Cambio de relleno" en un modificador con recargo (+$1.000) dentro del flujo de selección de variantes. *(Se implementará en Paso 3 — Modal de variantes)*
-- [ ] Implementar "Salsas extras" como una sección de *upsell* (¿Algo más para tu pedido?) en el drawer del carrito antes del checkout. *(Se implementará junto con el checkout)*
+- [x] Convertir "Cambio de relleno" en un modificador con recargo (+$1.000) dentro del flujo de selección de variantes. *(Implementado en Paso 4.11)*
+- [x] Implementar "Salsas extras" como una sección de *upsell* (¿Algo más para tu pedido?) en el drawer del carrito antes del checkout. *(Implementado en Paso 4.11)*
 - [x] Incorporar el "Despacho dentro de Quilicura" ($2.000) como una línea fija y automática en el resumen del pedido (subtotal + delivery = total). *(Ya implementado en cart.js y cart-ui.js)*
 
 ### Paso 3 — Flujo de Selección de Variantes
@@ -467,49 +467,102 @@ checkout.js → setDeliveryMode('pickup')
 - [x] Actualizar `specs.md` para reflejar en el estado actual que se incluyeron optimizaciones UX Móvil.
 
 ### Paso 4.11 — Extras y Modificadores (Paso 2.5 final)
-- [ ] Modificar `cart.js` para permitir inyección de precios personalizados (`customPrice`).
-- [ ] Modificar `modal.js` para renderizar un checkbox de "Cambio de relleno (+$1.000)" y alterar el nombre/precio de la variante elegida al agregar.
-- [ ] Añadir UI en `index.html` (al fondo del cart drawer) para "Salsas Extras (+$500)" como upsell.
-- [ ] Modificar `cart-ui.js` para escuchar el clic del botón de upsell e inyectar el producto `salsas-extras` en el carrito.
 
-### Paso 6 — Actualización de `init.sh` (39 checks)
+> **Nota**: El Paso 4.11 fue reemplazado por el Paso 4.11.10 tras una revisión de UX basada en el mercado real (Papa Johns, Domino's, PedidosYa). El diseño de "modificadores estructurados con checkbox" se descartó en favor de un flujo más flexible: texto libre para personalización + selector de salsas con cantidad. Ver detalle en Paso 4.11.10.
 
-> **Objetivo**: Expandir el script de validación `init.sh` de 31 a 39 checks para cubrir los nuevos módulos JS, componentes Sass y skills IA de la Fase 2.
-> **Razonamiento**: `init.sh` verificaba solo la estructura de la Fase 1. Con los nuevos archivos (`cart.js`, `cart-ui.js`, `modal.js`, `checkout.js`, `_cart-drawer.scss`, `_modal.scss`, `_checkout.scss`, `agent/README.md`), el script debe garantizar que todos los componentes del MVP funcional están presentes antes de compilar.
+### Paso 4.11.10 — Refactor UX: Personalización, Salsas y Teléfono
 
-- [x] **`init.sh`** — Añadidos 8 nuevos checks:
-  - [x] Módulos JS: `cart.js`, `cart-ui.js`, `modal.js`, `checkout.js`.
-  - [x] Componentes Sass: `_cart-drawer.scss`, `_modal.scss`, `_checkout.scss`.
-  - [x] Skills IA: `agent/README.md`.
-- [x] **Validación**: `./init.sh` → 39/39 checks pasados, 0 fallos, 0 advertencias.
+> **Diseño validado contra Papa Johns, Domino's, PedidosYa y Justo (mercado LatAm)**.
+> Filosofía: modal solo para variants obligatorias (Rolls a la Carta), personalización como texto libre en el carrito, salsas como selector con cantidad en el drawer, teléfono obligatorio en checkout.
 
-### Paso 7 — Actualización de `specs.md` e `infrastructure.md`
+#### Plan de implementación ejecutado:
 
-> **Objetivo**: Sincronizar la documentación técnica con el estado actual del proyecto tras la Fase 2.
-> **Diagnóstico**: Ambos archivos están desactualizados respecto a los nuevos módulos JS (carrito, modal, checkout), componentes Sass, el selector Delivery/Retiro y el contador de checks de `init.sh`.
+- [x] **4.11.10.1 — `catalog.js`**: Revertido `handleAddToCart()` a la bifurcación original. Products con `variants` → abren modal. Products sin `variants` → `addToCart()` directo. Restaurado `import { addToCart }`.
+- [x] **4.11.10.2 — `modal.js`**: Revertido a versión solo-variants. Eliminada toda la lógica de modifiers/checkbox. Solo renderiza radio buttons de relleno.
+- [x] **4.11.10.3 — `cart.js`**: Limpiado código legacy (`arraysMatch()`, `getItemEffectivePrice()`). Restaurado `addToCart(product, variantName)`. Nuevo estado: `state.salsas[]` y `state.customizationNote`. Nuevas funciones: `addSalsa()`, `removeSalsa()`, `getSalsas()`, `getSalsaTotal()`, `setCustomizationNote()`, `getCustomizationNote()`. `getTotal()` suma: subtotal + salsas + deliveryFee + (customizationNote ? $1.000 : 0). Todo persiste en localStorage.
+- [x] **4.11.10.4 — `menu.js`**: Reemplazado array `modifiers` por `salsaOptions` con 2 salsas base: Salsa de Soya ($500) y Salsa Agridulce ($500). Array extensible: el dueño puede agregar más salsas añadiendo objetos al array.
+- [x] **4.11.10.5 — `cart-ui.js`**: Nuevo selector de salsas en el drawer (sección "🥫 Agregar salsas") con controles −/cantidad/+ por cada salsa. Botón "📝 Personalizar pedido (+$1.000)" que abre modal con textarea. Badge "📝 Personalizado" si hay nota activa. Eliminado listener legacy de `upsell-salsas-btn`.
+- [x] **4.11.10.6 — `index.html`**: Nuevo modal de personalización con textarea y placeholder. Nuevos contenedores `#cart-salsas` y `#cart-customization` en el drawer. Nuevo campo 📱 Teléfono en checkout (después del nombre). Eliminado bloque legacy `upsell-salsas-btn`.
+- [x] **4.11.10.7 — `_cart-drawer.scss`**: Nuevos estilos para `.cart-drawer__salsas-header`, `.cart-drawer__salsa-item`, `.cart-drawer__salsa-qty`, `.cart-drawer__salsa-price`, `.cart-drawer__customization`, `.cart-drawer__custom-badge`, `.cart-drawer__custom-note`.
+- [x] **4.11.10.8 — `checkout.js`**: Validación de teléfono obligatorio. Mensaje WhatsApp incluye salsas ("🥫 Salsas: • 2x Salsa de Soya — $1.000"), personalización ("📝 Pedido personalizado: sin nori, ..."), y teléfono ("📞 +56 9 XXXX XXXX"). Resumen del checkout muestra salsas en la lista de items.
+- [x] **4.11.10.9 — Limpieza legacy**: Verificadas 0 referencias a `modifiers` en `src/js/`. Eliminado intento de `.remove()` de `upsell-salsas-btn` en `cart-ui.js`.
+- [x] **4.11.10.10 — `npm run build` + `./init.sh`**: Build exitoso (534ms, JS 6.70 kB gzip, CSS 5.05 kB gzip). 39/39 checks OK.
 
-- [x] **`specs.md`** — Actualizado:
-  - [x] Fecha de revisión a 2026-06-13.
-  - [x] Estructura de archivos con nuevos JS (`cart.js`, `cart-ui.js`, `modal.js`, `checkout.js`) y Sass (`_cart-drawer`, `_modal`, `_checkout`).
-  - [x] Tabla de diferencias actualizada con componentes y módulos de Fase 2.
-  - [x] `init.sh` de 14 a 39 checks.
-  - [x] Frontend responsabilidades actualizadas con carrito, checkout y Delivery/Retiro.
-  - [x] Fases de implementación reordenadas (Fase 2 completada marcada).
-  - [x] Checklist de despliegue dividido por capas con checks de Fase 2.
+### Paso 4.11.11 — Totalización en tiempo real del carrito
 
-- [x] **`infrastructure.md`** — Actualizado:
-  - [x] Descripción del servicio frontend con stack, módulos JS, componentes Sass y características.
-  - [x] Checklist de QA con sub-sección "Frontend — Funcional (Fase 2)" con 7 checks detallados.
+> **Validado contra Papa Johns, Domino's, PedidosYa**: El carrito lateral debe mostrar el total parcial (productos + salsas + personalización) en tiempo real, difiriendo solo el costo de envío al checkout.
 
-### Paso 8 — Actualización de Skills IA en `agent/`
+#### Plan de implementación ejecutado:
 
-> **Objetivo**: Sincronizar los skills de la carpeta `agent/` con las lecciones aprendidas durante la Fase 2.
-> **Diagnóstico**: Auditados los 11 skills + `README.md`. 3 skills necesitan actualización, 1 con cambio menor.
+- [x] **4.11.11.1 — `index.html`**: Reemplazado el summary del drawer. Nuevas líneas: "Subtotal productos" (fijo), "Salsas: $X.XXX" (oculta si en 0), "Personalización: $1.000" (oculta si sin nota), "Total parcial: $XX.XXX" (suma de todo excepto envío). La nota "Los costos de envío se calcularán en el siguiente paso" se mantiene.
+- [x] **4.11.11.2 — `cart-ui.js`**: Nueva función `updateSummary()` que calcula y renderiza las líneas dinámicas. Se llama desde: `cart:updated`, `renderCartItems()`, y al abrir el drawer. Sincronizada con cambios de salsas y personalización vía el evento `cart:updated`.
+- [x] **4.11.11.3 — `npm run build` + `./init.sh`**: Build exitoso (550ms, JS 6.84 kB gzip). 39/39 checks OK.
 
-- [x] **`agent/README.md`** — Actualizado: Fase 2 de "En progreso" a "Completada".
-- [x] **`agent/skill-05-cart-architecture.md`** — Actualizado: `deliveryMode`, `cart-ui.js`, `notifyCartChange()`, evento `cart:updated`, `modal.js`, `buildWhatsAppMessage()` con modo Delivery/Retiro.
-- [x] **`agent/skill-10-js-module-pattern.md`** — Actualizado: estructura `src/js/` con 5 módulos, ejemplo `main.js` real, patrón separación UI/Estado, tabla de eventos Custom Events.
-- [x] **`agent/skill-03-deploy-easypanel.md`** — Actualizado (menor): "31/31 checks" → "39/39 checks".
+### Paso 4.11.12 — Checkout: Reflejar salsas y personalización
+
+> **Bug reportado por el usuario**: En la ventana "Finalizar Pedido" no se refleja el detalle de salsas ni personalización seleccionados en el drawer, generando confusión y ensuciando la UX.
+> **Diagnóstico**: El checkout sí renderizaba salsas en la lista de items, pero no tenía líneas separadas en el summary (Subtotal no incluía salsas), no mostraba personalización, y el salto entre Subtotal y Total confundía al usuario.
+
+#### Plan de implementación ejecutado:
+
+- [x] **4.11.12.1 — `index.html`**: Agregadas 2 nuevas líneas en `checkout__summary`: "Salsas: $X.XXX" (`#checkout-salsas-line`, oculta si en 0) y "Personalización: $1.000" (`#checkout-custom-line`, oculta si sin nota), entre Subtotal y Despacho.
+- [x] **4.11.12.2 — `checkout.js`**: `renderCheckoutSummary()` actualizado para mostrar/ocultar `#checkout-salsas-line` y `#checkout-custom-line` según el estado. Además, ahora renderiza la nota de personalización como un item especial en la lista: `📝 [nota] +$1.000`.
+- [x] **4.11.12.3 — `npm run build` + `./init.sh`**: Build exitoso (540ms, JS 6.95 kB gzip). 39/39 checks OK.
+
+### Paso 6 — Actualización de `init.sh` (39 → 44 checks)
+
+> **Objetivo**: Expandir el script de validación `init.sh` para cubrir los nuevos archivos y funciones exportadas de la Fase 2 completa (salsas, personalización, teléfono).
+> **Razonamiento**: Los pasos 4.11.10, 4.11.11 y 4.11.12 introdujeron nuevas estructuras de datos clave (`salsaOptions` en menu.js), funciones exportadas (`addSalsa`, `setCustomizationNote` en cart.js) y elementos HTML (`customization-modal-overlay`, `checkout-phone`) que deben validarse.
+
+- [x] **`init.sh`**: Añadidos 5 nuevos checks sobre los anteriores 39:
+  - [x] `salsaOptions en menu.js` — verifica que el array de salsas existe.
+  - [x] `addSalsa exportada en cart.js` — verifica la función de salsas.
+  - [x] `setCustomizationNote exportada en cart.js` — verifica la función de personalización.
+  - [x] `customization-modal en index.html` — verifica que el modal de personalización existe.
+  - [x] `checkout-phone en index.html` — verifica que el campo teléfono existe.
+- [x] **Validación**: `./init.sh` → 44/44 checks pasados, 0 fallos, 0 advertencias.
+
+### Paso 7 — Actualización de `specs.md` e `infrastructure.md` (Post-Fase 2 completa)
+
+> **Objetivo**: Sincronizar la documentación técnica con el estado real del proyecto tras los pasos 4.11.10-4.11.12 y la expansión de `init.sh` a 44 checks.
+> **Diagnóstico**: Ambos documentos estaban desactualizados. Faltaban salsas, personalización, teléfono obligatorio, totalización en tiempo real en drawer y checkout.
+
+- [x] **`specs.md`** — 6 actualizaciones:
+  - [x] Estado de implementación con salsas, personalización, teléfono, totalización.
+  - [x] `init.sh`: 39 → 44 checks.
+  - [x] Responsabilidades frontend: selector salsas, personalización, totalización, teléfono, resumen checkout.
+  - [x] Funcionalidades Fase 2: +4 items (selector salsas, personalización, teléfono, totalización).
+  - [x] Fase 2 checklist: expandido de 8 a 12 items.
+  - [x] Checklist de despliegue Fase 2: de 7 a 12 items.
+
+- [x] **`infrastructure.md`** — 4 actualizaciones:
+  - [x] Módulos JS descripción con salsas y personalización.
+  - [x] Checks: 39 → 44, características expandidas.
+  - [x] Checklist QA: 44 checks.
+  - [x] Checklist funcional Fase 2: de 6 a 9 items detallados.
+
+### Paso 9 — Actualización de `README.md`
+
+> **Objetivo**: Sincronizar el README principal del proyecto con las nuevas capacidades desarrolladas en Fase 2 (carrito, salsas, personalización, checkout WhatsApp).
+> **Diagnóstico**: README.md mencionaba "botonera flotante" (eliminada en Paso 4.8), no listaba los módulos JS de Fase 2, y no documentaba las secciones de Carrito ni Checkout.
+
+- [x] **Objetivos**: Reemplazado "botonera flotante" por "Carrito lateral", "Salsas y personalización", "Checkout WhatsApp".
+- [x] **Estructura**: Ampliado `src/js/` con los 5 módulos reales (`cart.js`, `cart-ui.js`, `modal.js`, `checkout.js`).
+- [x] **Secciones**: Agregadas "Carrito lateral" y "Checkout" a la lista de secciones del sitio.
+
+### Paso 8 — Actualización de Skills IA en `agent/` (Post-Fase 2 completa)
+
+> **Objetivo**: Sincronizar `agent/README.md` con las nuevas capacidades de salsas, personalización, teléfono y totalización.
+> **Diagnóstico**: El índice no mencionaba `salsaOptions` en Skill 04 ni las nuevas funciones exportadas en Skill 10.
+
+- [x] **`agent/README.md`** — 7 actualizaciones:
+  - [x] Fecha: 2026-06-14.
+  - [x] Nueva fila en tabla: "Agregar/modificar salsas → Skill 04".
+  - [x] Skill 04: documenta `salsaOptions` (array extensible).
+  - [x] Skill 05: documenta `addSalsa`, `removeSalsa`, `setCustomizationNote`, selector salsas, personalización texto libre, teléfono, totalización.
+  - [x] Skill 10: documenta `updateSummary()`, `getSalsaTotal()`, `setCustomizationNote()`.
+  - [x] Skill 11: documenta estilos selector salsas, modal personalización, resumen checkout dinámico.
+  - [x] Fase 2: "Carrito + Salsas + Personalización + Checkout WhatsApp + Delivery/Retiro".
 
 ### Paso 5 — Revisión de Deuda Técnica
 - [x] Evaluar la mantenibilidad del código en Vanilla JS tras implementar esta lógica de estado.

@@ -1,4 +1,4 @@
-import { getCart, getSubtotal, getTotal, clearCart, setDeliveryMode, getDeliveryMode } from './cart.js';
+import { getCart, getSubtotal, getTotal, getSalsaTotal, clearCart, setDeliveryMode, getDeliveryMode, getSalsas, getCustomizationNote } from './cart.js';
 import { formatPrice } from '../data/menu.js';
 
 const WHATSAPP_NUMBER = '56972377458';
@@ -29,7 +29,6 @@ function openCheckout() {
   document.body.style.overflow = 'hidden';
   checkoutSection.style.display = 'flex';
 
-  // Initialize delivery mode buttons
   initDeliveryModeButtons();
   renderCheckoutSummary();
 }
@@ -38,7 +37,6 @@ function initDeliveryModeButtons() {
   const container = document.querySelector('.checkout__delivery-mode');
   if (!container) return;
 
-  // Sync active button with current mode
   const currentMode = getDeliveryMode();
   container.querySelectorAll('.delivery-mode-btn').forEach(btn => {
     const isActive = btn.dataset.mode === currentMode;
@@ -53,17 +51,14 @@ function initDeliveryModeButtons() {
     const mode = btn.dataset.mode;
     setDeliveryMode(mode);
 
-    // Update active state
     container.querySelectorAll('.delivery-mode-btn').forEach(b => {
       b.classList.toggle('delivery-mode-btn--active', b.dataset.mode === mode);
     });
 
-    // Show/hide address field
     toggleAddressField(mode);
     renderCheckoutSummary();
   });
 
-  // Apply initial visibility
   toggleAddressField(currentMode);
 }
 
@@ -86,6 +81,11 @@ function renderCheckoutSummary() {
   const subtotalEl = document.getElementById('checkout-subtotal');
   const deliveryLine = document.querySelector('.checkout__summary-line--delivery');
   const totalEl = document.getElementById('checkout-total');
+  const salsas = getSalsas();
+  const customNote = getCustomizationNote();
+  const hasSalsas = salsas.length > 0;
+  const hasCustom = !!customNote;
+  const salsaTotal = getSalsaTotal();
 
   if (list) {
     list.innerHTML = cart.items.map(item => `
@@ -94,30 +94,71 @@ function renderCheckoutSummary() {
         <span class="checkout__item-price">${formatPrice(item.price * item.quantity)}</span>
       </div>
     `).join('');
+
+    if (hasSalsas) {
+      salsas.forEach(s => {
+        const div = document.createElement('div');
+        div.className = 'checkout__item';
+        div.innerHTML = `<span>${s.quantity}x ${s.name}</span><span class="checkout__item-price">${formatPrice(s.price * s.quantity)}</span>`;
+        list.appendChild(div);
+      });
+    }
+
+    if (hasCustom) {
+      const noteEl = document.createElement('div');
+      noteEl.className = 'checkout__item checkout__custom-note';
+      noteEl.innerHTML = `<span>📝 ${customNote}</span><span class="checkout__item-price">+$1.000</span>`;
+      list.appendChild(noteEl);
+    }
   }
 
   if (subtotalEl) subtotalEl.textContent = formatPrice(getSubtotal());
+
+  const salsasLine = document.getElementById('checkout-salsas-line');
+  const salsasTotal = document.getElementById('checkout-salsas-total');
+  if (salsasLine && salsasTotal) {
+    salsasLine.style.display = hasSalsas ? 'flex' : 'none';
+    salsasTotal.textContent = formatPrice(salsaTotal);
+  }
+
+  const customLine = document.getElementById('checkout-custom-line');
+  if (customLine) {
+    customLine.style.display = hasCustom ? 'flex' : 'none';
+  }
+
   if (deliveryLine) deliveryLine.style.display = getDeliveryMode() === 'pickup' ? 'none' : 'flex';
   if (totalEl) totalEl.textContent = formatPrice(getTotal());
 }
 
 function buildWhatsAppMessage(cart, customerInfo) {
-  const { name, address, notes } = customerInfo;
+  const { name, phone, address, notes } = customerInfo;
   const mode = getDeliveryMode();
-  const items = cart.items
+  const salsas = getSalsas();
+  const customNote = getCustomizationNote();
+
+  const lines = cart.items
     .map(item => {
       const variant = item.variantName ? ` (${item.variantName})` : '';
       return `• ${item.quantity}x ${item.name}${variant} — $${(item.price * item.quantity).toLocaleString('es-CL')}`;
     })
     .join('\n');
 
-  const messageLines = [
+  let messageLines = [
     '🍣 *PEDIDO MASSARO SUSHI*',
     '',
     '📋 *Detalle:*',
-    items,
-    '',
+    lines,
   ];
+
+  if (salsas.length) {
+    messageLines.push('');
+    messageLines.push('🥫 *Salsas:*');
+    salsas.forEach(s => {
+      messageLines.push(`• ${s.quantity}x ${s.name} — $${(s.price * s.quantity).toLocaleString('es-CL')}`);
+    });
+  }
+
+  messageLines.push('');
 
   if (mode === 'delivery') {
     messageLines.push(`🛵 *Delivery*`, `📍 ${address}`, '');
@@ -128,6 +169,12 @@ function buildWhatsAppMessage(cart, customerInfo) {
   messageLines.push(`💰 *Total: $${getTotal().toLocaleString('es-CL')}*`);
   messageLines.push('');
   messageLines.push(`👤 *Cliente:* ${name}`);
+  messageLines.push(`📞 *Teléfono:* ${phone}`);
+
+  if (customNote) {
+    messageLines.push(`📝 *Pedido personalizado:* ${customNote}`);
+  }
+
   messageLines.push(`📝 *Notas:* ${notes || 'Sin notas'}`);
 
   return `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(messageLines.join('\n'))}`;
@@ -135,6 +182,7 @@ function buildWhatsAppMessage(cart, customerInfo) {
 
 function sendWhatsApp() {
   const name = document.getElementById('checkout-name').value.trim();
+  const phone = document.getElementById('checkout-phone').value.trim();
   const address = document.getElementById('checkout-address').value.trim();
   const notes = document.getElementById('checkout-notes').value.trim();
   const errorEl = document.getElementById('checkout-error');
@@ -143,6 +191,14 @@ function sendWhatsApp() {
   if (!name) {
     if (errorEl) {
       errorEl.textContent = 'Por favor ingresa tu nombre.';
+      errorEl.style.display = 'block';
+    }
+    return;
+  }
+
+  if (!phone) {
+    if (errorEl) {
+      errorEl.textContent = 'Por favor ingresa tu número de teléfono.';
       errorEl.style.display = 'block';
     }
     return;
@@ -159,7 +215,7 @@ function sendWhatsApp() {
   if (errorEl) errorEl.style.display = 'none';
 
   const cart = getCart();
-  const url = buildWhatsAppMessage(cart, { name, address, notes });
+  const url = buildWhatsAppMessage(cart, { name, phone, address, notes });
 
   clearCart();
   closeCheckout();

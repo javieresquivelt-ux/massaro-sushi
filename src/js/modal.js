@@ -37,7 +37,6 @@ function openModal(product) {
   overlay.classList.add('is-visible');
   document.body.style.overflow = 'hidden';
 
-  // Update selected style on radio change
   const radios = overlay.querySelectorAll('.modal__variant-input');
   radios.forEach(radio => {
     radio.addEventListener('change', () => {
@@ -48,7 +47,6 @@ function openModal(product) {
     });
   });
 
-  // Pre-select first variant
   const firstLabel = overlay.querySelector('.modal__variant');
   if (firstLabel) firstLabel.classList.add('is-selected');
 }
@@ -72,7 +70,6 @@ function confirmVariant() {
   closeModal();
 }
 
-// Wire up close and confirm buttons
 document.addEventListener('DOMContentLoaded', () => {
   const overlay = document.getElementById('variant-modal-overlay');
   if (!overlay) return;

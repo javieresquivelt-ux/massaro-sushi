@@ -1,5 +1,5 @@
-import { getCart, getSubtotal, getTotal, getItemCount, removeFromCart, updateQuantity } from './cart.js';
-import { formatPrice } from '../data/menu.js';
+import { getCart, getSubtotal, getItemCount, removeFromCart, updateQuantity, addSalsa, removeSalsa, getSalsas, getSalsaTotal, setCustomizationNote, getCustomizationNote } from './cart.js';
+import { formatPrice, salsaOptions } from '../data/menu.js';
 
 function getEl(id) {
   return document.getElementById(id);
@@ -21,10 +21,28 @@ export function initCartUI() {
 
   document.addEventListener('cart:updated', () => {
     updateBadge();
+    updateSummary();
+    if (isOpen) {
+      renderCartItems();
+      renderSalsas();
+      renderCustomizationBadge();
+    }
     openDrawer();
   });
 
-  // Initial render
+  const customModalOverlay = getEl('customization-modal-overlay');
+  if (customModalOverlay) {
+    const closeCustomBtn = document.getElementById('custom-modal-close');
+    const saveCustomBtn = document.getElementById('custom-note-save');
+    const clearCustomBtn = document.getElementById('custom-note-clear');
+    if (closeCustomBtn) closeCustomBtn.addEventListener('click', closeCustomModal);
+    if (saveCustomBtn) saveCustomBtn.addEventListener('click', saveCustomNote);
+    if (clearCustomBtn) clearCustomBtn.addEventListener('click', clearCustomNote);
+    customModalOverlay.addEventListener('click', (e) => {
+      if (e.target === customModalOverlay) closeCustomModal();
+    });
+  }
+
   updateBadge();
 }
 
@@ -36,6 +54,8 @@ function openDrawer() {
   if (overlay) overlay.classList.add('is-visible');
   document.body.style.overflow = 'hidden';
   renderCartItems();
+  renderSalsas();
+  renderCustomizationBadge();
 }
 
 function closeDrawer() {
@@ -60,13 +80,13 @@ function renderCartItems() {
   const body = getEl('cart-drawer-body');
   const footer = getEl('cart-drawer-footer');
   const subtotalEl = getEl('cart-subtotal');
-  const totalEl = getEl('cart-total');
 
   if (!body) return;
 
   if (cart.items.length === 0) {
     body.innerHTML = '<div class="cart-drawer__empty">Tu carrito está vacío</div>';
     if (footer) footer.style.display = 'none';
+    updateSummary();
     return;
   }
 
@@ -94,9 +114,8 @@ function renderCartItems() {
   body.innerHTML = `<div class="cart-drawer__items">${itemsHtml}</div>`;
 
   if (subtotalEl) subtotalEl.textContent = formatPrice(getSubtotal());
-  // El Total ya no se muestra en el drawer, se difiere al checkout
+  updateSummary();
 
-  // Event delegation for cart item actions
   const itemsContainer = body.querySelector('.cart-drawer__items');
   if (!itemsContainer) return;
 
@@ -118,4 +137,130 @@ function renderCartItems() {
       updateQuantity(cartId, -1);
     }
   });
+}
+
+function renderSalsas() {
+  const container = getEl('cart-salsas');
+  if (!container) return;
+
+  const cart = getCart();
+
+  let html = '<div class="cart-drawer__salsas-header">🥫 Agregar salsas</div>';
+
+  salsaOptions.forEach(salsa => {
+    const inCart = cart.salsas.find(s => s.id === salsa.id);
+    const qty = inCart ? inCart.quantity : 0;
+    const totalPrice = qty * salsa.price;
+    html += `
+      <div class="cart-drawer__salsa-item" data-salsa-id="${salsa.id}">
+        <span class="cart-drawer__salsa-name">${salsa.name}</span>
+        <div class="cart-drawer__salsa-qty">
+          <button class="cart-item__qty-btn salsa-decrease">−</button>
+          <span class="cart-item__qty-value">${qty}</span>
+          <button class="cart-item__qty-btn salsa-increase">+</button>
+        </div>
+        <span class="cart-drawer__salsa-price">${qty > 0 ? formatPrice(totalPrice) : '—'}</span>
+      </div>
+    `;
+  });
+
+  container.innerHTML = html;
+
+  container.querySelectorAll('.salsa-increase').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      const item = e.target.closest('.cart-drawer__salsa-item');
+      const id = item.dataset.salsaId;
+      const salsa = salsaOptions.find(s => s.id === id);
+      if (salsa) addSalsa(salsa.id, salsa.name, salsa.price);
+    });
+  });
+
+  container.querySelectorAll('.salsa-decrease').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      const item = e.target.closest('.cart-drawer__salsa-item');
+      const id = item.dataset.salsaId;
+      removeSalsa(id);
+    });
+  });
+}
+
+function updateSummary() {
+  const cart = getCart();
+  const salsaTotal = getSalsaTotal();
+  const customNote = getCustomizationNote();
+  const hasSalsas = salsaTotal > 0;
+  const hasCustom = !!customNote;
+  const subtotal = cart.items.reduce((acc, item) => acc + item.price * item.quantity, 0);
+  const totalPartial = subtotal + salsaTotal + (hasCustom ? 1000 : 0);
+
+  const salsasLine = getEl('summary-salsas-line');
+  const salsasTotal = getEl('summary-salsas-total');
+  if (salsasLine && salsasTotal) {
+    salsasLine.style.display = hasSalsas ? 'flex' : 'none';
+    salsasTotal.textContent = formatPrice(salsaTotal);
+  }
+
+  const customLine = getEl('summary-custom-line');
+  if (customLine) {
+    customLine.style.display = hasCustom ? 'flex' : 'none';
+  }
+
+  const totalEl = getEl('cart-drawer-total');
+  if (totalEl) totalEl.textContent = formatPrice(totalPartial);
+}
+
+function renderCustomizationBadge() {
+  const container = getEl('cart-customization');
+  if (!container) return;
+
+  const note = getCustomizationNote();
+
+  if (note) {
+    container.innerHTML = `
+      <div class="cart-drawer__customization">
+        <span class="cart-drawer__custom-badge">📝 Personalizado</span>
+        <p class="cart-drawer__custom-note">"${note}"</p>
+        <button class="btn btn--small btn--secondary" id="edit-custom-btn">Editar</button>
+      </div>
+    `;
+  } else {
+    container.innerHTML = `
+      <div class="cart-drawer__customization">
+        <button class="btn btn--small btn--secondary" id="edit-custom-btn" style="width:100%;">
+          📝 Personalizar pedido (+$1.000)
+        </button>
+      </div>
+    `;
+  }
+
+  const editBtn = document.getElementById('edit-custom-btn');
+  if (editBtn) editBtn.addEventListener('click', openCustomModal);
+}
+
+function openCustomModal() {
+  const overlay = getEl('customization-modal-overlay');
+  if (!overlay) return;
+  const textarea = document.getElementById('custom-note-input');
+  if (textarea) textarea.value = getCustomizationNote();
+  overlay.classList.add('is-visible');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeCustomModal() {
+  const overlay = getEl('customization-modal-overlay');
+  if (!overlay) return;
+  overlay.classList.remove('is-visible');
+  document.body.style.overflow = '';
+}
+
+function saveCustomNote() {
+  const textarea = document.getElementById('custom-note-input');
+  if (!textarea) return;
+  setCustomizationNote(textarea.value.trim());
+  closeCustomModal();
+}
+
+function clearCustomNote() {
+  setCustomizationNote('');
+  closeCustomModal();
 }

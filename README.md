@@ -14,7 +14,10 @@ Proyecto práctico que aplica conceptos de:
 - **Arquitectura Sass 7–1** — Estilos modulares y escalables
 - **Vite** — Build tool moderno con HMR
 - **Imágenes responsivas** — Formato WebP, optimización con sharp-cli
-- **Mobile-first** — UX priorizando dispositivos móviles (navegación hamburguesa, botonera flotante, filtro select nativo)
+- **Mobile-first** — UX priorizando dispositivos móviles (navegación hamburguesa, filtro select nativo)
+- **Carrito lateral** — Estado con localStorage, persistencia, badge en tiempo real
+- **Salsas y personalización** — Selector de salsas con cantidad, personalización texto libre
+- **Checkout WhatsApp** — Pedido preformateado con Delivery/Retiro y teléfono obligatorio
 - **Despliegue GitOps** — Docker multi-stage + EasyPanel + Nginx
 - **Harness Engineering** — Flujo de trabajo asistido por IA con guards operativos
 
@@ -37,7 +40,11 @@ massaro-sushi/
 │   ├── data/
 │   │   └── menu.js         ← Carta completa (~40 productos)
 │   ├── js/
-│   │   └── catalog.js      ← Lógica de filtrado y render
+│   │   ├── catalog.js      ← Lógica de filtrado y render
+│   │   ├── cart.js         ← Estado del carrito (localStorage, salsas, personalización)
+│   │   ├── cart-ui.js      ← UI del drawer, selector de salsas, modal personalización
+│   │   ├── modal.js        ← Modal de selección de variantes
+│   │   └── checkout.js     ← Checkout WhatsApp + Delivery/Retiro + teléfono
 │   └── sass/               ← Arquitectura 7–1
 │       ├── app.scss        ← Orquestador
 │       ├── abstracts/
@@ -57,6 +64,8 @@ massaro-sushi/
 - **Hero** — Portada con logo, título y CTA
 - **Catálogo** — Grid de productos con filtro por categoría (tabs desktop + select móvil)
 - **Promos** — Lista ampliada con detalle de piezas y contenido
+- **Carrito lateral** — Drawer con items del pedido, selector de salsas y personalización
+- **Checkout** — Formulario con nombre, teléfono, Delivery/Retiro y envío a WhatsApp
 - **Footer** — Delivery, contacto y redes sociales
 
 ---

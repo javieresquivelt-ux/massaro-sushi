@@ -10,6 +10,11 @@ import imgTablaMassaro from '../assets/img/categories/tabla-massaro.webp';
 import imgPromos from '../assets/img/categories/promos.webp';
 import imgAdicionales from '../assets/img/categories/adicionales.webp';
 
+export const salsaOptions = [
+  { id: 'salsa-soya', name: 'Salsa de Soya', price: 500 },
+  { id: 'salsa-agridulce', name: 'Salsa Agridulce', price: 500 },
+];
+
 export const categories = [
   { id: 'promos', name: 'Promos' },
   { id: 'rolls-a-la-carta', name: 'Rolls a la Carta' },
