@@ -576,3 +576,92 @@ checkout.js → setDeliveryMode('pickup')
 - [x] **Solución**: Añadido `data-product-id="${promo.id}"` al `<article class="promo-card">` en `renderCatalog()` de `catalog.js`.
 - [x] **Bug real descubierto**: `updateBadge()` en `cart-ui.js` estaba dentro del bloque `if (isOpen)`. Al agregar un producto con el drawer cerrado, `isOpen = false`, por lo que el badge nunca se actualizaba. **Solución**: `updateBadge()` se ejecuta siempre, fuera del `if`.
 - [x] **Bug badge invisible**: `position: absolute` del badge se calculaba incorrectamente por el `position: sticky` del header. **Solución**: Eliminado `position: absolute`, ahora usa flujo normal flexbox. El drawer se abre automáticamente al agregar un producto para dar feedback inmediato.
+
+---
+
+## 🛠️ Fase 3: Backend API — Fastify + PostgreSQL + Redis
+
+> **Objetivo**: Instalar el motor de datos real en el VPS. Al finalizar, el frontend consultará el catálogo desde la BD y los pedidos se registrarán en PostgreSQL (historial) sin romper el flujo WhatsApp existente.
+>
+> **Decisiones de diseño aprobadas**:
+> - Monorepo: el backend vive en `/api` dentro de `massaro-sushi`.
+> - Enfoque híbrido: pedidos se persisten en PostgreSQL **y** se siguen enviando a WhatsApp.
+> - Sin ORM: SQL directo con `pg` para control total y bajo overhead en VPS pequeño.
+> - Sin pago online en esta fase: se implementa en Fase 5 (Transbank/Khipu).
+
+---
+
+### Paso 3.1 — Scaffolding del Backend (`/api`)
+
+- [ ] Crear estructura de carpetas `/api/src/routes/`, `/api/src/db/migrations/`, `/api/src/services/`, `/api/src/plugins/`
+- [ ] Crear `api/package.json` con dependencias: `fastify`, `@fastify/cors`, `@fastify/rate-limit`, `pg`, `ioredis`, `dotenv`
+- [ ] Crear `api/src/app.js` — instancia Fastify + registro de plugins y rutas
+- [ ] Crear `api/src/plugins/cors.js` — CORS restringido a `massaro.cystec.cloud`
+- [ ] Crear `api/src/plugins/redis.js` — conexión ioredis + rate limit
+- [ ] Crear `api/src/db/client.js` — Pool de `pg` usando `DATABASE_URL`
+- [ ] Crear `api/.env.example` — plantilla de variables (commiteado)
+- [ ] Crear `api/Dockerfile` — build multi-stage Node 20 Alpine
+- [ ] Ejecutar `npm install` en `/api` y validar que levanta sin errores
+
+### Paso 3.2 — Migraciones SQL (8 archivos)
+
+> Basado en el esquema completo de `agent/skill-09-database-schema.md`.
+
+- [ ] `api/src/db/migrations/001_create_categories.sql`
+- [ ] `api/src/db/migrations/002_create_products.sql`
+- [ ] `api/src/db/migrations/003_create_variants_modifiers.sql` — `product_variants`, `modifier_groups`, `modifiers`
+- [ ] `api/src/db/migrations/004_create_combos.sql` — `combos`, `combo_items`
+- [ ] `api/src/db/migrations/005_create_customers_orders.sql` — `customers`, `customer_addresses`, `orders`, `order_items`
+- [ ] `api/src/db/migrations/006_create_payments.sql` — `payments`, `payment_events`
+- [ ] `api/src/db/migrations/007_create_operational.sql` — `delivery_zones`, `store_hours`, `audit_logs`, `webhook_logs`
+- [ ] `api/src/db/migrations/008_seeds_initial.sql` — Zona Quilicura, horarios, categorías y ~40 productos del menú
+- [ ] Crear `api/src/db/migrate.js` — script para ejecutar migraciones en orden
+
+### Paso 3.3 — Endpoints MVP
+
+- [ ] `api/src/routes/health.js` — `GET /health` → `{ status: 'ok', timestamp }`
+- [ ] `api/src/routes/categories.js` — `GET /categories` (con caché Redis 5 min)
+- [ ] `api/src/routes/products.js` — `GET /products` + `GET /products/:id` (caché Redis 5 min)
+- [ ] `api/src/routes/orders.js` — `POST /orders`:
+  - [ ] Recibir carrito (ítems, salsas, personalización, modo entrega, datos cliente)
+  - [ ] Recalcular total en el servidor (el frontend NO es fuente de verdad del precio)
+  - [ ] Validar `idempotency_key` en Redis (TTL 24h) para evitar pedidos duplicados
+  - [ ] Persistir en `orders` + `order_items` en PostgreSQL
+  - [ ] Retornar `{ orderId, total, status: 'pending' }`
+- [ ] `api/src/services/order.js` — lógica de negocio (cálculo de total, idempotencia)
+- [ ] Pruebas manuales con `curl` de todos los endpoints
+
+### Paso 3.4 — Integración Frontend → API
+
+- [ ] Crear `.env` en raíz con `VITE_API_URL=http://localhost:3000` (desarrollo local)
+- [ ] Modificar `src/js/catalog.js`:
+  - [ ] Añadir `fetchCatalog()` que llame a `GET ${VITE_API_URL}/products`
+  - [ ] Fallback automático: si la API falla → usar datos estáticos de `menu.js`
+- [ ] Modificar `src/js/checkout.js`:
+  - [ ] Antes de abrir WhatsApp, llamar `POST ${VITE_API_URL}/orders` para registrar el pedido
+  - [ ] Si la API falla (timeout/error): continuar igualmente hacia WhatsApp (degradación elegante)
+- [ ] Validar que el flujo completo funciona con la API encendida y apagada
+
+### Paso 3.5 — Despliegue en EasyPanel
+
+- [ ] Crear servicio `postgres` en EasyPanel (imagen `postgres:15-alpine`, solo red interna)
+- [ ] Crear servicio `redis` en EasyPanel (imagen `redis:7-alpine`, solo red interna)
+- [ ] Ejecutar migraciones contra el PostgreSQL de EasyPanel (`node api/src/db/migrate.js`)
+- [ ] Crear servicio `api` en EasyPanel (desde `/api/Dockerfile`, rama `main`)
+- [ ] Cargar variables de entorno en EasyPanel para el servicio `api` (según `infrastructure.md`)
+- [ ] Vincular dominio `api.massaro.cystec.cloud` al servicio `api`
+- [ ] Añadir variable `VITE_API_URL=https://api.massaro.cystec.cloud` al servicio `frontend`
+- [ ] Validar: `curl https://api.massaro.cystec.cloud/health` → `{ status: 'ok' }`
+
+### Paso 3.6 — Actualización de `init.sh` (44 → ~52 checks)
+
+- [ ] Añadir checks: `api/package.json`, `api/src/app.js`, `api/src/db/client.js`, `api/src/db/migrations/`, `api/.env.example`, `api/Dockerfile`
+- [ ] Validar: `./init.sh` → N/N checks pasados, 0 fallos
+
+### Paso 3.7 — Documentación Post-Fase 3
+
+- [ ] Actualizar `memory.md` con decisiones tomadas y lecciones aprendidas
+- [ ] Actualizar `task.md` marcando todos los pasos completados
+- [ ] Actualizar `specs.md` con estado de Fase 3 y nuevas responsabilidades del backend
+- [ ] Actualizar `infrastructure.md` con servicios `postgres`, `redis`, `api`, variables de entorno reales y checklist QA de backend
+- [ ] Actualizar `agent/skill-08-backend-api-fastify.md` con lecciones aprendidas del deploy real

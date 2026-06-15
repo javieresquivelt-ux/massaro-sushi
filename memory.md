@@ -421,3 +421,53 @@ El primer diseño implementó un sistema de **modificadores estructurados** con 
 - `task.md` ✅ — Todos los pasos planificados y ejecutados registrados
 - `memory.md` ✅ — Memoria persistente con todas las decisiones y razonamientos
 - `init.sh` ✅ — 44/44 checks validando entorno, estructura, funciones exportadas y elementos HTML clave
+
+---
+
+## Planificación de Fase 3 — Backend API (2026-06-14)
+
+### Contexto y motivación
+- **Problema**: Tras completar Fase 2, el frontend es funcional pero los pedidos no quedan registrados en ningún sistema. Todo depende de que el dueño responda WhatsApp. No hay historial, ni analytics, ni base para un panel admin.
+- **Objetivo de Fase 3**: Instalar el motor de datos real en el VPS. Al finalizar, los pedidos se persisten en PostgreSQL para tener historial completo, sin romper el flujo WhatsApp que ya funciona y que el dueño conoce.
+
+### Decisiones de diseño aprobadas por el usuario
+
+#### 1. Monorepo (carpeta `/api` en `massaro-sushi`)
+- **Aprobado**: ✅ (2026-06-14)
+- **Razón**: Un solo `git push` sincroniza frontend y backend. EasyPanel puede construir imágenes Docker independientes desde subcarpetas del mismo repo usando el parámetro `Build Path`. Mantiene el contexto de negocio unificado y simplifica el Harness Engineering (un solo `task.md`, un solo `init.sh`).
+- **Alternativa descartada**: Repo separado — añade complejidad operativa (dos tokens GitHub, dos pipelines, dos sets de documentación) sin beneficio en este tamaño de proyecto.
+
+#### 2. Enfoque híbrido: PostgreSQL + WhatsApp
+- **Aprobado**: ✅ (2026-06-14)
+- **Razón**: El dueño ya tiene un flujo operativo real con WhatsApp que funciona. Romperlo requeriría entrenamiento, cambio de hábito y arriesgar pedidos. El enfoque híbrido agrega valor (historial, analytics) sin fricción operativa: los pedidos se persisten en BD **y** se envían a WhatsApp exactamente como hoy.
+- **Implementación**: `checkout.js` llama primero a `POST /orders` (registra en BD), y si la llamada tiene éxito o falla, continúa igual hacia WhatsApp. Degradación elegante garantizada.
+
+#### 3. Sin ORM — SQL directo con `pg`
+- **Razón**: El VPS tiene 4 GB RAM compartidos entre todos los servicios. Un ORM como Prisma añade ~50-100 MB de overhead de runtime y complejidad de migrations innecesaria para ~10 endpoints bien definidos. Con SQL directo, el equipo tiene control total sobre los queries y los índices.
+
+#### 4. Sin pago online en Fase 3
+- **Razón**: La integración con Transbank/Khipu requiere certificados, cuenta comercial, ambiente sandbox y pruebas de integración que merecen una fase dedicada. En Quilicura el pago en efectivo o transferencia al momento de la entrega es el estándar del mercado. Se implementa en Fase 5.
+
+### Arquitectura de la degradación elegante
+
+```
+Usuario presiona "Enviar pedido"
+  │
+  ├── 1. POST /orders (API)
+  │     ├── Éxito → orderId guardado → continúa a WhatsApp
+  │     └── Error/Timeout → ignora → continúa a WhatsApp igualmente
+  │
+  └── 2. Abre WhatsApp con mensaje preformateado (siempre ocurre)
+```
+
+Esta arquitectura garantiza que:
+- Nunca se pierde un pedido por un problema de la API.
+- Cuando la API funciona, el pedido queda registrado en PostgreSQL.
+- El dueño no necesita saber si la API respondió: sigue usando WhatsApp.
+
+### Principio de recalculación de precios en el servidor
+El frontend calcula totales para mostrar al usuario, pero **la API recalcula el total de forma independiente** antes de persistir en BD. Esto evita manipulación de precios desde el cliente (ej. alguien que intercepte la petición y cambie el precio). El total del mensaje WhatsApp (del frontend) y el total en BD pueden diferir levemente si hay cambios de precios — el del servidor es el correcto.
+
+### Próximos pasos (pendientes de ejecución)
+- Pasos 3.1 al 3.7 registrados en `task.md` — **pendientes de ejecución, en espera de aprobación del usuario**.
+
