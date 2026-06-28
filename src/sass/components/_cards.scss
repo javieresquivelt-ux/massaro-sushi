@@ -114,8 +114,15 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
+    flex-wrap: wrap;
+    gap: var(--spacing-sm);
     border-top: 1px solid rgba(255, 255, 255, 0.06);
     padding-top: var(--spacing-md);
+
+    .btn {
+      flex-grow: 1;
+      text-align: center;
+    }
   }
 
   // Precio con estilo chip amarillo (estilo carta Massaro)

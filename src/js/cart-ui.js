@@ -16,18 +16,21 @@ export function initCartUI() {
   if (!drawer || !toggle) return;
 
   toggle.addEventListener('click', () => openDrawer());
+  const fabBtn = getEl('fab-cart');
+  if (fabBtn) fabBtn.addEventListener('click', () => openDrawer());
   if (closeBtn) closeBtn.addEventListener('click', () => closeDrawer());
   if (overlay) overlay.addEventListener('click', () => closeDrawer());
 
-  document.addEventListener('cart:updated', () => {
+  document.addEventListener('cart:updated', (e) => {
     updateBadge();
     updateSummary();
+    updateFab();
     if (isOpen) {
       renderCartItems();
       renderSalsas();
       renderCustomizationBadge();
     }
-    openDrawer();
+
   });
 
   const customModalOverlay = getEl('customization-modal-overlay');
@@ -44,6 +47,29 @@ export function initCartUI() {
   }
 
   updateBadge();
+  updateFab();
+
+  // FAB Móvil: click abre el drawer del carrito
+  const fab = document.getElementById('mobile-fab');
+  if (fab) {
+    fab.addEventListener('click', () => openDrawer());
+  }
+}
+
+function updateFab() {
+  const fab = document.getElementById('fab-cart');
+  if (!fab) return;
+
+  const count = getItemCount();
+  const subtotal = getSubtotal();
+
+  if (count > 0) {
+    fab.style.display = 'flex';
+    fab.textContent = `🛒 Ver mi pedido — ${formatPrice(subtotal)}`;
+    fab.dataset.count = count;
+  } else {
+    fab.style.display = 'none';
+  }
 }
 
 function openDrawer() {

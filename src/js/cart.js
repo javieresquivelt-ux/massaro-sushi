@@ -34,9 +34,9 @@ function saveCart(state) {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
 }
 
-function notifyCartChange() {
+function notifyCartChange(productName = null) {
   document.dispatchEvent(new CustomEvent('cart:updated', {
-    detail: { itemCount: getItemCount(), total: getTotal() },
+    detail: { itemCount: getItemCount(), total: getTotal(), productName },
   }));
 }
 
@@ -76,7 +76,7 @@ export function addToCart(product, variantName = null) {
   }
 
   saveCart(state);
-  notifyCartChange();
+  notifyCartChange(product.name);
 }
 
 export function removeFromCart(cartItemId) {

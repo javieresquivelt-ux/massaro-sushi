@@ -1,9 +1,62 @@
 import './sass/app.scss'
-import { initTabs } from './js/catalog.js'
+import { renderCatalog, initCatalogSidebar } from './js/catalog.js'
 import { initCart } from './js/cart.js'
 import { initCartUI } from './js/cart-ui.js'
 import { initModal } from './js/modal.js'
 import { initCheckout } from './js/checkout.js'
+
+function initSpaNavigation() {
+  const heroSection = document.getElementById('hero-section');
+  const menuSection = document.getElementById('menu');
+  const infoSection = document.getElementById('info-section');
+  const btnHeroMenu = document.getElementById('btn-hero-menu');
+  const btnShowMenu = document.getElementById('btn-show-menu');
+  const btnShowHero = document.getElementById('btn-show-hero');
+  const btnShowInfo = document.getElementById('btn-show-info');
+  const btnOrderNow = document.getElementById('btn-order-now');
+
+  const hideAllSections = () => {
+    heroSection?.classList.add('d-none');
+    menuSection?.classList.remove('catalog--active');
+    infoSection?.classList.remove('info-section--active');
+  };
+
+  const showHero = () => {
+    hideAllSections();
+    heroSection?.classList.remove('d-none');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const showMenu = () => {
+    hideAllSections();
+    menuSection?.classList.add('catalog--active');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const showInfo = () => {
+    if (window.innerWidth >= 768) {
+      const footer = document.querySelector('.footer');
+      if (footer) footer.scrollIntoView({ behavior: 'smooth' });
+    } else {
+      hideAllSections();
+      infoSection?.classList.add('info-section--active');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  };
+
+  if (btnHeroMenu) btnHeroMenu.addEventListener('click', showMenu);
+  if (btnShowMenu) btnShowMenu.addEventListener('click', (e) => { e.preventDefault(); showMenu(); });
+  if (btnShowHero) btnShowHero.addEventListener('click', (e) => { e.preventDefault(); showHero(); });
+  if (btnShowInfo) btnShowInfo.addEventListener('click', (e) => { e.preventDefault(); showInfo(); });
+  if (btnOrderNow) btnOrderNow.addEventListener('click', (e) => { e.preventDefault(); showMenu(); });
+
+  const navLinks = document.querySelectorAll('#main-nav a');
+  navLinks.forEach(link => {
+    link.addEventListener('click', () => {
+      document.getElementById('main-nav')?.classList.remove('is-open');
+    });
+  });
+}
 
 document.addEventListener('DOMContentLoaded', () => {
   const menuToggle = document.getElementById('menu-toggle');
@@ -13,19 +66,13 @@ document.addEventListener('DOMContentLoaded', () => {
     menuToggle.addEventListener('click', () => {
       mainNav.classList.toggle('is-open');
     });
-
-    // UX: Cerrar el menú automáticamente al hacer click en cualquier enlace (One-Page navigation)
-    const navLinks = mainNav.querySelectorAll('a');
-    navLinks.forEach(link => {
-      link.addEventListener('click', () => {
-        mainNav.classList.remove('is-open');
-      });
-    });
   }
 
+  initSpaNavigation();
   initCart();
   initCartUI();
   initModal();
   initCheckout();
-  initTabs();
+  renderCatalog();
+  initCatalogSidebar();
 });

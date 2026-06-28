@@ -20,7 +20,7 @@
       <!-- Cabecera / Navegación Superior -->
       <header class="header">
         <div class="container header__inner">
-          <a href="/" class="header__logo">
+          <a href="/" class="header__logo" id="btn-show-hero">
             <!-- Logo real de Massaro Sushi -->
             <img src="/src/assets/img/logo_massaro.jpg" alt="Massaro Sushi" class="header__logo-img" />
           </a>
@@ -43,9 +43,9 @@
 
           <!-- Navegación Principal -->
           <nav class="header__nav" id="main-nav">
-            <a href="#menu" class="header__link">Menú</a>
-            <a href="#nosotros" class="header__link">Nosotros</a>
-            <a href="#" class="btn btn--primary">Pedir Ahora</a>
+            <a href="#menu" class="header__link" id="btn-show-menu">Menú</a>
+            <a href="#info" class="header__link" id="btn-show-info">Nosotros</a>
+            <a href="#" class="btn btn--primary" id="btn-order-now">Pedir Ahora</a>
           </nav>
         </div>
       </header>
@@ -53,52 +53,75 @@
       <!-- Contenido Principal Dinámico -->
       <main class="main-content">
         
-        <!-- Sección Hero: Portada de Bienvenida -->
-        <section class="hero">
+        <!-- Sección Hero: Portada de Bienvenida (visible por defecto) -->
+        <section class="hero" id="hero-section">
           <div class="container hero__inner">
             <img src="/src/assets/img/logo_massaro.jpg" alt="Massaro Sushi" class="hero__logo" />
             <h1 class="hero__title">Sushi Artesanal</h1>
             <p class="hero__subtitle">Rolls clásicos y premium preparados al instante con ingredientes frescos.</p>
-            <a href="#menu" class="btn btn--primary btn--large">Ver Menú</a>
+            <button class="btn btn--primary btn--large" id="btn-hero-menu">Ver Menú</button>
           </div>
         </section>
 
-        <div class="container">
-          
-          <!-- Sección del Catálogo de Productos -->
-          <section id="menu" class="catalog">
+        <!-- Sección del Catálogo de Productos (oculta por defecto en móvil) -->
+        <section id="menu" class="catalog">
+          <div class="container">
             <div class="catalog__header">
               <h2 class="catalog__title section-title">Nuestra Carta</h2>
               <p class="catalog__subtitle">Rolls clásicos y premium preparados en el momento.</p>
             </div>
 
-            <!-- Tabs de Filtro por Categoría (Desktop) -->
-            <div class="catalog__tabs"></div>
+            <div class="catalog__body">
+              <!-- Sidebar de Categorías (Desktop) -->
+              <aside class="catalog__sidebar"></aside>
 
-            <!-- Filtro por Categoría (Móvil) -->
-            <div class="catalog__filter-mobile">
-              <label for="category-select" class="sr-only">Filtrar por categoría</label>
-              <select id="category-select" class="catalog__select"></select>
+              <!-- Contenido del Catálogo -->
+              <div class="catalog__content">
+                <!-- El contenido se inyecta dinámicamente aquí vía JS -->
+              </div>
             </div>
+          </div>
+        </section>
 
-            <!-- Cuadrícula de Tarjetas de Producto (renderizada por JS) -->
-            <div class="catalog__grid"></div>
-          </section>
+        <!-- Sección Información (vista independiente, oculta por defecto) -->
+        <section class="info-section" id="info-section">
+          <div class="container">
+            <div class="info-section__inner">
+              <h2 class="section-title">Información</h2>
+              
+              <div class="info-section__grid">
+                <div class="info-section__block">
+                  <h3 class="info-section__heading">Delivery</h3>
+                  <p class="info-section__item">📍 Quilicura — Despacho $2.000</p>
+                  <p class="info-section__item">🕐 Lun — Dom, 12:00 — 22:00 hrs</p>
+                </div>
 
-        </div>
+                <div class="info-section__block">
+                  <h3 class="info-section__heading">Contacto</h3>
+                  <p class="info-section__item">📱 <a href="https://wa.me/56972377458" target="_blank" rel="noopener">+56 9 7237 7458</a></p>
+                  <p class="info-section__item">📧 <a href="mailto:info@massaro.cl">info@massaro.cl</a></p>
+                </div>
+
+                <div class="info-section__block">
+                  <h3 class="info-section__heading">Síguenos</h3>
+                  <p class="info-section__item">📘 <a href="https://facebook.com/MassaroQuilicura" target="_blank" rel="noopener">/MassaroQuilicura</a></p>
+                  <p class="info-section__item">📸 <a href="https://instagram.com/massaro_sushi" target="_blank" rel="noopener">@massaro_sushi</a></p>
+                </div>
+              </div>
+
+              <div class="info-section__copyright">
+                <p>&copy; 2026 Massaro Sushi. Todos los derechos reservados.</p>
+              </div>
+            </div>
+          </div>
+        </section>
+
       </main>
 
-      <!-- Pie de Página con información del negocio -->
+      <!-- Pie de Página simplificado (solo copyright en móvil) -->
       <footer class="footer">
         <div class="container footer__inner">
-          
-          <!-- Marca -->
-          <div class="footer__brand">
-            <img src="/src/assets/img/logo_massaro.jpg" alt="Massaro Sushi" class="footer__logo" />
-            <span class="footer__name">Massaro Sushi</span>
-          </div>
-
-          <!-- Cuadrícula de información -->
+          <!-- Cuadrícula de información (visible en desktop) -->
           <div class="footer__info">
             
             <!-- Zona de reparto -->
@@ -146,7 +169,6 @@
           <div class="footer__bottom">
             <p>&copy; 2026 Massaro Sushi. Todos los derechos reservados.</p>
           </div>
-
         </div>
       </footer>
 
@@ -288,6 +310,9 @@
         <button class="btn btn--primary cart-drawer__checkout-btn" id="cart-checkout-btn">Continuar pedido</button>
       </div>
     </aside>
+
+    <!-- FAB Móvil -->
+    <button id="fab-cart" class="fab" style="display:none;">🛒 Ver mi pedido ($0)</button>
 
     <!-- Punto de entrada principal de JavaScript para Vite -->
     <script type="module" src="/src/main.js"></script>

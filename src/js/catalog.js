@@ -1,105 +1,90 @@
-import { products, categories, getProductsByCategory, formatPrice } from '../data/menu.js';
+import { products, categories, getProductsByCategory, getCategoryName, formatPrice } from '../data/menu.js';
 import { addToCart } from './cart.js';
+export function renderCatalog() {
+  const catalogContent = document.querySelector('.catalog__content');
+  if (!catalogContent) return;
 
-function renderTabs(container) {
-  const allTab = document.createElement('button');
-  allTab.className = 'catalog__tab catalog__tab--active';
-  allTab.dataset.category = '';
-  allTab.textContent = 'Todo';
-  container.appendChild(allTab);
-
-  const selectContainer = document.getElementById('category-select');
-  if (selectContainer) {
-    selectContainer.innerHTML = '<option value="">Categoría: Todo</option>';
-  }
-
-  categories.forEach(cat => {
-    const tab = document.createElement('button');
-    tab.className = 'catalog__tab';
-    tab.dataset.category = cat.id;
-    tab.textContent = cat.name;
-    container.appendChild(tab);
-
-    if (selectContainer) {
-      const option = document.createElement('option');
-      option.value = cat.id;
-      option.textContent = cat.name;
-      selectContainer.appendChild(option);
-    }
-  });
-}
-
-export function renderCatalog(gridContainer, categoryId = null) {
-  const items = getProductsByCategory(categoryId);
-
-  if (!items.length) {
-    gridContainer.innerHTML = '<p class="catalog__empty">No hay productos en esta categoría.</p>';
-    return;
-  }
-
-  const regularItems = items.filter(p => p.category !== 'promos');
-  const promos = items.filter(p => p.category === 'promos');
-
+  const defaultCategory = 'promos';
   let html = '';
 
-  // Renderizar productos regulares como cards
-  if (regularItems.length) {
-    html += regularItems.map(product => {
-      const hasVariants = product.variants && product.variants.length > 0;
-      const variantText = hasVariants
-        ? `<span class="card__variant-hint">Relleno: ${product.variants.map(v => v.name).join(' · ')}</span>`
-        : '';
-      const badgeHtml = product.badges
-        ? product.badges.map(b => `<span class="card__badge card__badge--${b.toLowerCase()}">${b}</span>`).join('')
-        : '';
-      const piecesHtml = product.pieces
-        ? `<span class="card__badge card__badge--pieces">${product.pieces} pz.</span>`
-        : '';
+  categories.forEach(cat => {
+    const items = getProductsByCategory(cat.id);
+    if (!items.length) return;
 
-      return `
-        <article class="card" data-category="${product.category}" data-product-id="${product.id}">
-          <div class="card__image-wrapper">
-            <img src="${product.image}" alt="${product.name}" class="card__image" loading="lazy" />
-            ${badgeHtml}
-            ${piecesHtml}
+    const isDefault = cat.id === defaultCategory;
+
+    html += `<div class="catalog__category-group${isDefault ? ' is-expanded is-active-tab' : ''}" data-category-group="${cat.id}">
+      <button class="catalog__accordion-header">
+        <span>${cat.name}</span>
+        <span class="icon">▼</span>
+      </button>
+      <div class="catalog__category-items">
+        <div class="catalog__category-items-inner">`;
+
+    const regularItems = items.filter(p => p.category !== 'promos');
+    const promos = items.filter(p => p.category === 'promos');
+
+    if (regularItems.length) {
+      html += '<div class="catalog__grid">';
+      html += regularItems.map(product => {
+        const hasVariants = product.variants && product.variants.length > 0;
+        const variantText = hasVariants
+          ? `<span class="card__variant-hint">Relleno: ${product.variants.map(v => v.name).join(' · ')}</span>`
+          : '';
+        const badgeHtml = product.badges
+          ? product.badges.map(b => `<span class="card__badge card__badge--${b.toLowerCase()}">${b}</span>`).join('')
+          : '';
+        const piecesHtml = product.pieces
+          ? `<span class="card__badge card__badge--pieces">${product.pieces} pz.</span>`
+          : '';
+
+        return `
+          <article class="card" data-category="${product.category}" data-product-id="${product.id}">
+            <div class="card__image-wrapper">
+              <img src="${product.image}" alt="${product.name}" class="card__image" loading="lazy" />
+              ${badgeHtml}
+              ${piecesHtml}
+            </div>
+            <div class="card__content">
+              <h3 class="card__title">${product.name}</h3>
+              <p class="card__desc">${product.description}</p>
+              ${variantText}
+              <div class="card__footer">
+                <span class="card__price">${formatPrice(product.price)}</span>
+                <button class="btn btn--primary">Agregar</button>
+              </div>
+            </div>
+          </article>
+        `;
+      }).join('');
+      html += '</div>';
+    }
+
+    if (promos.length) {
+      html += '<div class="catalog__promos">';
+      html += promos.map(promo => `
+        <article class="promo-card" data-product-id="${promo.id}">
+          <div class="promo-card__image-wrapper">
+            <img src="${promo.image}" alt="${promo.name}" class="promo-card__image" loading="lazy" />
+            <span class="promo-card__pieces">${promo.pieces} pz.</span>
           </div>
-          <div class="card__content">
-            <h3 class="card__title">${product.name}</h3>
-            <p class="card__desc">${product.description}</p>
-            ${variantText}
-            <div class="card__footer">
-              <span class="card__price">${formatPrice(product.price)}</span>
+          <div class="promo-card__content">
+            <h3 class="promo-card__name">${promo.name}</h3>
+            <p class="promo-card__desc">${promo.description}</p>
+            <div class="promo-card__footer">
+              <span class="promo-card__price">${formatPrice(promo.price)}</span>
               <button class="btn btn--primary">Agregar</button>
             </div>
           </div>
         </article>
-      `;
-    }).join('');
-  }
+      `).join('');
+      html += '</div>';
+    }
 
-  // Renderizar promos como lista ampliada
-  if (promos.length) {
-    html += `<div class="catalog__promos">`;
-    html += promos.map(promo => `
-      <article class="promo-card" data-product-id="${promo.id}">
-        <div class="promo-card__image-wrapper">
-          <img src="${promo.image}" alt="${promo.name}" class="promo-card__image" loading="lazy" />
-          <span class="promo-card__pieces">${promo.pieces} pz.</span>
-        </div>
-        <div class="promo-card__content">
-          <h3 class="promo-card__name">${promo.name}</h3>
-          <p class="promo-card__desc">${promo.description}</p>
-          <div class="promo-card__footer">
-            <span class="promo-card__price">${formatPrice(promo.price)}</span>
-            <button class="btn btn--primary">Agregar</button>
-          </div>
-        </div>
-      </article>
-    `).join('');
-    html += `</div>`;
-  }
+    html += '</div></div></div>'; // cierra: catalog__category-items-inner, catalog__category-items, catalog__category-group
+  });
 
-  gridContainer.innerHTML = html;
+  catalogContent.innerHTML = html;
 }
 
 function handleAddToCart(productId) {
@@ -115,51 +100,65 @@ function handleAddToCart(productId) {
   }
 }
 
-export function initTabs() {
-  const tabsContainer = document.querySelector('.catalog__tabs');
-  const gridContainer = document.querySelector('.catalog__grid');
+export function initCatalogSidebar() {
+  const sidebar = document.querySelector('.catalog__sidebar');
+  const catalogContent = document.querySelector('.catalog__content');
+  if (!sidebar || !catalogContent) return;
 
-  if (!tabsContainer || !gridContainer) return;
-
-  renderTabs(tabsContainer);
-  renderCatalog(gridContainer);
-
-  tabsContainer.addEventListener('click', (e) => {
-    const tab = e.target.closest('.catalog__tab');
-    if (!tab) return;
-
-    tabsContainer.querySelectorAll('.catalog__tab').forEach(t => t.classList.remove('catalog__tab--active'));
-    tab.classList.add('catalog__tab--active');
-
-    const category = tab.dataset.category;
-    
-    // Sync select
-    const select = document.getElementById('category-select');
-    if (select) select.value = category;
-
-    renderCatalog(gridContainer, category || null);
+  categories.forEach((cat, index) => {
+    const btn = document.createElement('button');
+    btn.className = `catalog__sidebar-btn${index === 0 ? ' catalog__sidebar-btn--active' : ''}`;
+    btn.dataset.category = cat.id;
+    btn.textContent = cat.name;
+    sidebar.appendChild(btn);
   });
 
-  const select = document.getElementById('category-select');
-  if (select) {
-    select.addEventListener('change', (e) => {
-      const category = e.target.value;
-      
-      // Sync tabs
-      tabsContainer.querySelectorAll('.catalog__tab').forEach(t => {
-        if (t.dataset.category === category) {
-          t.classList.add('catalog__tab--active');
-        } else {
-          t.classList.remove('catalog__tab--active');
-        }
-      });
+  // Sidebar click — mostrar/ocultar grupos
+  sidebar.addEventListener('click', (e) => {
+    const btn = e.target.closest('.catalog__sidebar-btn');
+    if (!btn) return;
 
-      renderCatalog(gridContainer, category || null);
+    sidebar.querySelectorAll('.catalog__sidebar-btn').forEach(b => b.classList.remove('catalog__sidebar-btn--active'));
+    btn.classList.add('catalog__sidebar-btn--active');
+
+    const category = btn.dataset.category;
+    const groups = catalogContent.querySelectorAll('.catalog__category-group');
+
+    groups.forEach(group => {
+      if (group.dataset.categoryGroup === category) {
+        group.classList.add('is-active-tab');
+      } else {
+        group.classList.remove('is-active-tab');
+      }
     });
-  }
+  });
 
-  // Event delegation for "Agregar" buttons
-  gridContainer.addEventListener('click', (e) => {
+  // En desktop solo se muestra la categoría activa (Promos por defecto)
+  // El CSS ya oculta los grupos sin is-active-tab en desktop
+
+  // Acordeón móvil — cierre mutuo
+  catalogContent.addEventListener('click', (e) => {
+    const header = e.target.closest('.catalog__accordion-header');
+    if (!header) return;
+
+    const group = header.closest('.catalog__category-group');
+    if (!group) return;
+
+    const isExpanded = group.classList.contains('is-expanded');
+
+    // Cerrar todos los demás grupos
+    catalogContent.querySelectorAll('.catalog__category-group.is-expanded').forEach(g => {
+      g.classList.remove('is-expanded');
+    });
+
+    // Toggle el clicado
+    if (!isExpanded) {
+      group.classList.add('is-expanded');
+    }
+  });
+
+  // Event delegation para botones "Agregar"
+  catalogContent.addEventListener('click', (e) => {
     const btn = e.target.closest('.btn--primary');
     if (!btn) return;
 

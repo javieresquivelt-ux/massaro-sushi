@@ -1,6 +1,6 @@
 # Memoria Persistente
 
-**Última actualización:** 2026-06-14
+**Última actualización:** 2026-06-27
 
 ## Decisiones Técnicas Consolidadas
 - **Stack Inicial**: Vanilla JS + Vite + Sass 7-1.
@@ -471,3 +471,313 @@ El frontend calcula totales para mostrar al usuario, pero **la API recalcula el 
 ### Próximos pasos (pendientes de ejecución)
 - Pasos 3.1 al 3.7 registrados en `task.md` — **pendientes de ejecución, en espera de aprobación del usuario**.
 
+---
+
+### 🐛 Bugfix: Espaciado excesivo entre header, hero y footer (2026-06-27) — SOLUCIÓN FINAL
+
+**Problema**: Tras múltiples iteraciones, el espacio entre el hero y el copyright del footer seguía siendo excesivo en móvil.
+
+**Diagnóstico raíz (3er intento)**: El layout `.app-wrapper (flex column, min-height: 100dvh) > header + main-content + footer` combinaba `flex-grow: 1` en `.main-content` con `margin-top: auto` en `.footer`. Cuando el hero no tenía altura forzada (`flex: 1` removido), `.main-content` se estiraba con `flex-grow: 1` para llenar el viewport, pero el hero solo ocupaba su altura natural (~300-400px). El espacio restante dentro de `.main-content` quedaba vacío, y el footer con `border-top` quedaba muy por debajo del hero. Intentos previos (reducir margin/padding a 0) no funcionaban porque el culpable era el `flex-grow` estirando `.main-content`.
+
+**Solución final**: Restaurar `flex: 1` en el hero para que sea él quien se estire dentro de `.main-content` y ocupe exactamente el espacio entre header y footer. Eliminar `margin-top: auto` del footer (ya no es necesario). El hero vuelve a llenar el viewport, pero ahora sin contenido del footer asomándose detrás porque en móvil `.footer__info` está oculto y el footer solo muestra el copyright con un `border-top` delgado y `padding-top: var(--spacing-xs)`.
+
+**Archivos modificados**:
+1. `src/sass/layout/_grid.scss` — `.main-content` cambió de `flex-grow: 1` a `flex: 1` (equivalente a `flex-grow: 1` + `flex-shrink: 1` + `flex-basis: 0`, más predecible en flex column).
+2. `src/sass/pages/_hero.scss` — `.hero` recuperó `flex: 1` para estirarse dentro de main-content.
+3. `src/sass/layout/_footer.scss` — Se eliminó `margin-top: auto` del footer. Padding en móvil a `0`, `gap` de `.footer__inner` a `0`, `padding-top` de `.footer__bottom` a `var(--spacing-xs)`. En desktop se mantienen los valores originales.
+
+**Resultado final**: El hero ocupa exactamente el viewport menos el header y el footer delgado con copyright. Sin espacios muertos, sin footer cortado, sin scroll innecesario.
+
+### Mejora UX Móvil: Footer como Sección Independiente — Vista Información (2026-06-27)
+
+**Problema**: En móvil, el footer con información operativa (Delivery, Contacto, Redes) aparece justo debajo del hero. Aunque se redujo su tamaño, sigue compitiendo visualmente con el hero, que debería ser la carta de presentación limpia e impactante.
+
+**Análisis de mercado (niusushi.cl)**: En la vista móvil de niusushi.cl, la información del negocio no está en el footer de la página principal. Está en una sección independiente accesible desde la navegación. El hero ocupa toda la pantalla sin distracciones, con solo la marca, un mensaje y un CTA.
+
+**Decisión de diseño**: Eliminar el footer informativo del layout principal en móvil y convertirlo en una vista SPA independiente (`#info-section`) accesible desde el menú hamburguesa mediante un enlace "Información". Esto mantiene la coherencia con el patrón SPA ya implementado (hero ↔ catálogo ↔ información).
+
+**Comportamiento resultante**:
+- **Móvil — Hero**: Footer invisible. Solo hero con logo, título y CTA. Header sticky con logo, hamburguesa y carrito.
+- **Móvil — Menú → "Información"**: Se oculta hero, se muestra `#info-section` con Delivery, Contacto, Redes y Copyright. Logo del header vuelve al hero.
+- **Desktop**: Footer se mantiene exactamente igual que antes (info + copyright), visible siempre.
+
+**Archivos a modificar**:
+- `index.html` — Nuevo enlace "Información" en nav, nueva `#info-section`, footer simplificado en móvil.
+- `src/main.js` — Lógica SPA para vista de información.
+- `src/sass/layout/_footer.scss` — Ocultar `.footer__info` en móvil.
+- Nuevo `src/sass/pages/_info.scss` — Estilos de la sección de información.
+- `src/sass/app.scss` — Importar `info`.
+
+### Mejora UX Footer: Hero sin Footer Cortado + Footer Compacto (2026-06-27)
+
+**Problema**: Con el hero configurado con `flex: 1` entre header y footer, en viewports donde el contenido real del hero (logo 160px + título 2.8rem + subtítulo + botón) era más bajo que el espacio disponible, el footer se asomaba detrás del hero mostrando solo su borde superior. Esto daba una sensación visual "sucia" y poco profesional.
+
+**Análisis de mercado (niusushi.cl)**: Los referentes del mercado no fuerzan el hero a ocupar el 100% del viewport. En su lugar, usan un hero con altura natural determinada por su contenido, con amplio padding interior, y el footer se ve completo solo al hacer scroll. Esto evita el problema del "footer cortado" y da una experiencia más limpia.
+
+**Decisión de diseño**: Combinación de las dos alternativas del usuario:
+1. **Hero con altura natural**: Cambiar de `flex: 1` a altura determinada por el contenido con `padding: var(--spacing-2xl)` vertical y `margin-bottom` para separar del footer. El hero se ve completo, centrado, y el footer queda debajo sin asomarse.
+2. **Footer compacto**: Reducir la tipografía del footer (títulos de `1rem` a `0.85rem`, items de `0.9rem` a `0.8rem`) y el espaciado interno y entre columnas. Esto hace que el grid de 3 columnas (Delivery, Contacto, Síguenos) se vea más denso, alineado horizontalmente, y profesional.
+
+**Archivos modificados**:
+- `src/sass/pages/_hero.scss` — Hero pasa de `flex: 1` a altura natural con padding generoso.
+- `src/sass/layout/_footer.scss` — Footer compactado: padding reducido, tipografía más pequeña, gap entre columnas reducido.
+
+### 🐛 Bugfix: Parpadeo al hacer clic en el logo del header (2026-06-27)
+
+**Problema**: En desktop, al hacer clic en el logo de Massaro del header, la pantalla parpadeaba/blanqueaba antes de mostrar el hero.
+
+**Diagnóstico**: El logo es `<a href="/" id="btn-show-hero">`. El listener JS ejecutaba `showHero()` pero nunca llamaba a `e.preventDefault()`. El navegador, al detectar un clic en un `<a href="/">`, intentaba navegar a la raíz, lo que en un SPA servido con Nginx significaba una petición HTTP que reiniciaba la aplicación momentáneamente (parpadeo). Lo mismo aplicaba para `btnOrderNow` y otros enlaces del nav.
+
+**Solución**: Agregar `e.preventDefault()` en todos los listeners de enlaces del nav (`btnShowMenu`, `btnShowHero`, `btnShowInfo`, `btnOrderNow`). La lógica SPA corre limpia, sin recarga.
+
+**Archivos modificados**:
+- `src/main.js` — Todos los listeners de enlaces ahora reciben el evento y llaman a `e.preventDefault()`.
+
+### Scroll vertical innecesario en vista móvil — Hero padding reducido (2026-06-27)
+
+**Problema**: En viewports móviles pequeños, el hero con `padding: var(--spacing-2xl)` (~3rem arriba y abajo) y gap interno `var(--spacing-lg)` sumaban demasiada altura vertical, superando los 100dvh y obligando al usuario a hacer scroll innecesario.
+
+**Solución**: Reducir el padding del hero en móvil para que sea simétrico con el footer:
+- En móviles ≤480px: `padding: 0 var(--spacing-md) var(--spacing-xs)` — sin padding superior (el contenido arranca justo debajo del header), mínimo padding inferior (`~0.25rem`) simétrico al `padding-top: var(--spacing-xs)` del copyright del footer.
+- Gap interno de `hero__inner` reducido de `var(--spacing-lg)` a `var(--spacing-md)` en móviles pequeños.
+
+**Archivos modificados**:
+- `src/sass/pages/_hero.scss` — Padding del hero y gap interno ajustados para móvil.
+
+### Actualización de Skills IA — Skill 07, Skill 10 y nuevo Skill 12 (2026-06-27)
+
+**Diagnóstico**: Los cambios recientes (SPA con 3 vistas, preventDefault en enlaces, footer como sección independiente, sidebar desktop + acordeón móvil, espaciado simétrico hero-footer) no estaban documentados en ningún skill, lo que podía llevar a errores si otro agente IA intentaba modificar estos componentes sin contexto.
+
+**Skills actualizados**:
+- **Skill 07** (Responsive Design): Añadidas 3 nuevas secciones:
+  1. "Footer como sección SPA independiente en móvil" — CSS para ocultar `.footer__info` en móvil, CSS para `#info-section` con clase `info-section--active`, y lógica JS con detección de viewport.
+  2. "Espaciado simétrico hero-footer en móvil" — Regla de padding mínimo y simétrico, ejemplos de `_hero.scss` y `_footer.scss`.
+  3. "Catálogo — Sidebar (Desktop) y Acordeón (Móvil)" — Layout del body, sidebar sticky, acordeón con cierre mutuo, ejemplos CSS completos.
+- **Skill 10** (JS Module Pattern): Reescrito el ejemplo de `main.js` con el estado real del proyecto (incluye `renderCatalog`, `initCatalogSidebar`, `initSpaNavigation`). Nueva sección "Patrón SPA" con 5 reglas: `hideAllSections()`, `preventDefault()` obligatorio en enlaces `<a>`, detección de viewport, `scrollTo` smooth, auto-cierre del menú hamburguesa.
+- **Skill 12** (Nuevo — Patrón SPA con Vanilla JS): Creado `skill-12-spa-vanilla-js.md` con la arquitectura completa de vistas intercambiables, clases CSS de activación (`d-none`, `catalog--active`, `info-section--active`), layout flex column, reglas críticas y checklist de navegación.
+- **agent/README.md**: Fecha actualizada a 2026-06-27, nueva fila en tabla de consulta para Skill 12, descripción del nuevo skill, nueva fase 2.5 en tabla de fases.
+
+### Expansión de init.sh (44 → 53 checks) — Auditoría de cobertura (2026-06-27)
+
+**Diagnóstico**: Se realizó una auditoría completa del script `init.sh` comparando los 44 checks existentes contra la estructura real del proyecto. Se identificaron 9 archivos/componentes nuevos o preexistentes que no estaban cubiertos: `src/js/catalog.js`, `src/sass/components/_tabs.scss`, `src/sass/components/_cards.scss`, `src/sass/pages/_hero.scss`, `src/sass/pages/_catalog.scss`, `src/sass/pages/_info.scss`, `agent/skill-12-spa-vanilla-js.md`, y elementos HTML `info-section` y `btn-order-now`.
+
+**Decisión**: Expandir `init.sh` a 53 checks añadiendo 9 nuevas validaciones. No se eliminó ningún check existente, todos siguen siendo válidos.
+
+**Nuevos checks añadidos**:
+1. `src/js/catalog.js existe` — Módulo core de renderizado del catálogo
+2. `_tabs.scss existe` — Componente de tabs
+3. `_cards.scss existe` — Componente de cards
+4. `_hero.scss existe` — Página del hero
+5. `_catalog.scss existe` — Página del catálogo
+6. `_info.scss existe` — Nueva página de info-section
+7. `info-section en index.html` — Elemento HTML de la sección de información
+8. `btn-order-now en index.html` — Botón de navegación rápida al pedido
+9. `agent/skill-12-spa-vanilla-js.md existe` — Nuevo skill 12
+
+**Validación**: `./init.sh` ejecutado → 53/53 checks pasados, 0 fallos, 0 advertencias.
+
+### Auditoría y actualización de specs.md e infrastructure.md (2026-06-27)
+
+**Diagnóstico**: Se auditaron ambos documentos contra el estado real del proyecto tras la Fase 2.5. Ambos estaban desactualizados: no reflejaban la navegación SPA, el sidebar/acordeón, la info-section, el preventDefault, el espaciado simétrico hero-footer, ni la expansión de `init.sh` a 53 checks.
+
+**Cambios en `specs.md`** (8 actualizaciones):
+1. Estado de implementación actualizado a 2026-06-27, incluyendo Fase 2.5.
+2. Estructura de archivos reescrita: eliminado `_floating-nav.scss`, `_home.scss`; agregados `_info.scss`, `skill-12`; descripción de `catalog.js` actualizada. Contador de skills: 11 → 12.
+3. `app.scss`: eliminado `@use 'components/floating-nav'`, agregado `@use 'pages/info'`.
+4. Punto de entrada JS: actualizado con `initSpaNavigation()`, `renderCatalog()`, `initCatalogSidebar()` y documentación de preventDefault.
+5. `init.sh`: 44 → 53 checks.
+6. Frontend responsabilidades: actualizadas con info-section, navegación SPA, sidebar/acordeón.
+7. Nuevas funcionalidades Fase 2.5 documentadas (11 items).
+8. Checklist de despliegue Fase 2: init.sh actualizado a 53 checks.
+
+**Cambios en `infrastructure.md`** (5 actualizaciones):
+1. Módulos JS: agregado `catalog.js` a la lista (5 módulos ahora).
+2. Componentes Sass: lista completa con `_tabs.scss`, `_cards.scss`, `_hero.scss`, `_catalog.scss`, `_info.scss`.
+3. Validación: 44/44 → 53/53 checks.
+4. Características frontend: agregadas navegación SPA, sidebar, acordeón, info-section, espaciado simétrico.
+5. Checklist QA: checks actualizados a 53, nueva sub-sección "Frontend — Funcional (Fase 2.5)" con 8 items detallados.
+
+### Refactor Menú Hamburguesa: "Información" → "Nosotros" + "Pedir Ahora" funcional (2026-06-27)
+
+**Problema**: El menú hamburguesa tenía "Información" como enlace redundante. "Nosotros" no hacía nada (ancla `#nosotros` inexistente). "Pedir Ahora" no llevaba a ningún lado (`href="#"`). Esto generaba confusión y dos elementos muertos en la navegación.
+
+**Decisión**: Eliminar "Información" y asignar su listener (`showInfo`) al enlace "Nosotros". El botón "Pedir Ahora" ahora ejecuta `showMenu()` para abrir el catálogo. Tanto en móvil como en desktop.
+
+**Archivos modificados**:
+- `index.html` — Eliminado `<a href="#info" id="btn-show-info">Información</a>`. Agregado `id="btn-show-info"` a "Nosotros". Agregado `id="btn-order-now"` a "Pedir Ahora".
+- `main.js` — Capturado `#btn-order-now` y asignado `showMenu()`.
+
+**Resultado**:
+- **Móvil — Menú**: Menú | Nosotros (abre info-section) | Pedir Ahora (abre catálogo)
+- **Desktop**: Menú | Nosotros | [Pedir Ahora]
+
+### Cierre de Fase 2.5 — Estado consolidado (2026-06-27)
+
+**Hitos completados en esta sesión**:
+1. **Fase 2.5 (SPA Views + Sidebar Desktop + Acordeón Móvil)**: Navegación SPA con 3 vistas intercambiables, sidebar sticky en desktop, acordeón con cierre mutuo en móvil. `renderCatalog()` ahora inyecta una sola vez.
+2. **Footer como sección independiente**: Info del negocio movida a `#info-section`, oculta en móvil, accesible desde "Nosotros". En desktop "Nosotros" scrollea al footer.
+3. **Refactor menú hamburguesa**: Eliminado "Información" redundante, "Nosotros" ahora funcional, "Pedir Ahora" abre catálogo.
+4. **preventDefault en navegación**: Todos los enlaces del nav ahora usan `e.preventDefault()` para evitar recargas/parpadeo.
+5. **Espaciado simétrico hero-footer**: Hero con `flex: 1`, padding mínimo en móvil, footer sin `margin-top: auto`.
+6. **init.sh expandido**: 44 → 53 checks (agregados catalog.js, _tabs.scss, _cards.scss, _hero.scss, _catalog.scss, _info.scss, info-section HTML, btn-order-now, skill-12).
+7. **Skills IA actualizados**: Skill 07 y Skill 10 extendidos. Nuevo Skill 12 (Patrón SPA).
+8. **specs.md e infrastructure.md**: Auditados y actualizados con todos los cambios de Fase 2.5.
+
+**Documentación actualizada**: `task.md` ✅ — `memory.md` ✅ — `specs.md` ✅ — `infrastructure.md` ✅ — `agent/README.md` ✅ — `init.sh` (53/53) ✅
+
+### Ejecución Fase 2.6 — Pulido Premium UX (2026-06-27)
+
+**Implementado**:
+1. **Transiciones SPA**: keyframes `fadeIn`, `fadeInUp` en `_animations.scss`. Hero con `transition: opacity 0.3s` + `fadeIn`. Catalog e info-section con `fadeIn 0.35s`. Cards y promos con `fadeInUp` escalonado por nth-child.
+2. **Toast**: Nuevo `src/js/toast.js` con `showToast()`. Nuevo `src/sass/components/_toast.scss` (glassmorphism, animación toastIn/toastOut). Integrado en `catalog.js` y `modal.js`. Auto-open del drawer desactivado.
+3. **FAB Móvil**: Nuevo `src/sass/components/_fab.scss` (full-width, fixed bottom, glassmorphism rojo). Elemento `#fab-cart` en `index.html`. `updateFab()` en `cart-ui.js` muestra/oculta con total formateado.
+4. **Acordeón Fluido**: CSS Grid `0fr → 1fr` con transición. Inner wrapper `catalog__category-items-inner` con `overflow: hidden; min-height: 0`.
+5. **Flexbox Wrap**: `.card__footer` con `flex-wrap: wrap` y `flex-grow: 1` en botón.
+
+**Archivos creados**: `src/js/toast.js`, `src/sass/components/_toast.scss`, `src/sass/components/_fab.scss`.
+
+**Archivos modificados**: `index.html`, `src/sass/app.scss`, `src/js/catalog.js`, `src/js/modal.js`, `src/js/cart-ui.js`, `src/sass/components/_cards.scss`, `src/sass/pages/_catalog.scss`.
+
+**Validación**: `npm run build` (591ms) ✅ — `./init.sh` (53/53) ✅
+
+### Ejecución Fase 2.7 — Microcopy Toast (2026-06-27)
+
+**Implementado**: Mensaje del toast estandarizado a `"✅ Tu selección se ha agregado al carrito"` en `catalog.js` y `modal.js`.
+
+**Validación**: Build OK — init.sh 53/53 ✅
+
+### Bugfix: FAB sin click listener — no abre el carrito (2026-06-27)
+
+**Problema**: La franja roja inferior (FAB) con el total del pedido se mostraba correctamente al agregar productos, pero al hacer clic sobre ella no abría el drawer del carrito. No hacía nada.
+
+**Diagnóstico**: La función `updateFab()` en `cart-ui.js` se encargaba de mostrar/ocultar el FAB y actualizar su texto, pero nunca se le asignó un event listener `click` que llamara a `openDrawer()`. El FAB era puramente decorativo.
+
+**Análisis de mercado**: En PedidosYa, UberEats, Rappi y Cornershop, el FAB/banner inferior siempre abre el carrito al hacer clic. Es el comportamiento estándar: "Ver mi pedido" → lleva al resumen.
+
+**Solución**: En `initCartUI()`, capturar `#fab-cart` y asignarle `fab.addEventListener('click', openDrawer)`.
+
+**Archivos modificados**: `src/js/cart-ui.js` — Agregado event listener para abrir el drawer al hacer clic en el FAB.
+
+**Validación**: `npm run build` ✅ — `./init.sh` 57/57 ✅
+
+### Bugfix: FAB fantasma "mobile-fab" sin estilos (2026-06-27)
+
+**Problema**: En la esquina inferior izquierda de la vista móvil aparecía un elemento deforme sin diseño con el texto "🛒 Ver mi pedido 0". Arruinaba la estética y desconfiguraba el layout móvil.
+
+**Diagnóstico**: El HTML contenía dos FABs:
+1. `#mobile-fab` (legacy del otro modelo IA) — sin estilos CSS, sin archivo `_mobile-fab.scss`, con clase `is-hidden` que no tenía definición CSS.
+2. `#fab-cart` (FAB actual) — con estilos en `_fab.scss`, clase `.fab`, glassmorphism.
+
+`updateFab()` en `cart-ui.js` solo usaba `#fab-cart`, pero `#mobile-fab` quedaba visible en el DOM renderizado como un botón nativo sin estilos.
+
+**Solución**: Eliminar el bloque completo de `#mobile-fab` del `index.html` (4 líneas: button, icon, text, count).
+
+**Archivos modificados**: `index.html` — Eliminado bloque legacy `#mobile-fab`.
+
+### Eliminación del filtro "Todo" del sidebar (Fase 2.9 — 2026-06-27)
+
+**Problema**: El sidebar del catálogo tenía un botón "Todo" como primera opción. Al cargar la página, "Todo" aparecía como botón activo pero la lógica de inicialización forzaba que solo la categoría "Promos" fuera visible. Esto generaba una contradicción visual (botón activo vs contenido visible) y confundía al usuario. Además, "Todo" mezclaba todas las categorías sin un orden claro, algo que las plataformas de referencia no hacen.
+
+**Análisis de mercado**: niusushi.cl, PedidosYa y Rappi no tienen filtro "Todo". La categoría por defecto es la más relevante (Promos/Destacados), y el usuario navega por las categorías específicas.
+
+**Decisión**: Eliminar el botón "Todo" del sidebar. Promos queda como la categoría activa por defecto, tanto en desktop (sidebar) como en móvil (acordeón expandido).
+
+**Archivos modificados**: `src/js/catalog.js` — Eliminado bloque de creación del botón "Todo". Ahora el primer elemento del array `categories` (Promos) se crea con `--active`. Eliminada condición `!category` en el click handler. Simplificada inicialización de desktop.
+
+**Validación**: `npm run build` (584ms) ✅ — `./init.sh` 53/53 ✅
+
+### Eliminación de Toast Redundante (Fase 2.8 — 2026-06-27)
+
+**Problema**: El toast de "agregado al carrito" resultó redundante con el badge del header (que se actualiza instantáneamente al hacer clic en "Agregar") y el FAB móvil (que aparece en la parte inferior con el total actualizado). Tres elementos de feedback para una misma acción: badge, FAB y toast.
+
+**Análisis de mercado (referencia validada)**:
+| Plataforma | Feedback al agregar al carrito |
+|---|---|
+| PedidosYa | Badge se actualiza + micro-animación. Sin toast |
+| Rappi | Badge se actualiza. Sin toast |
+| UberEats | Badge con rebote + FAB con total. Sin toast |
+| Cornershop | Badge + FAB. Sin toast |
+
+Ninguna de las plataformas líderes en Latinoamérica usa toast para este feedback. Confían en el badge (feedback visual inmediato en el header) y el FAB (feedback de conversión con el total).
+
+**Decisión**: Eliminar el componente Toast por completo. Esto simplifica el código, elimina 3 archivos (toast.js, _toast.scss, contenedor HTML) y reduce el peso del bundle.
+
+**Archivos eliminados**: `src/js/toast.js`, `src/sass/components/_toast.scss`.
+
+**Archivos modificados**: `index.html` (eliminado toast-container), `src/sass/app.scss` (eliminado import), `src/js/catalog.js` (eliminado import y llamada), `src/js/modal.js` (eliminado import y llamada), `src/js/cart-ui.js` (eliminado import legacy).
+
+**Validación**: `npm run build` ✅ — `./init.sh` 53/53 ✅
+
+---
+
+## Razonamiento Técnico — Optimización UX SPA y Acordeón (Fase 2.5)
+
+### Contexto y Requerimiento
+Tras evaluar la navegación inicial de la tienda móvil, se concluyó que mostrar el menú completo (`<section id="menu">`) bajo la portada obligaba a los usuarios a realizar un *scroll* excesivo e innecesario, sobrecargando la vista inicial. Referenciando el diseño de `niusushi.cl`, el usuario solicitó optimizar la UX móvil para mostrar primero el "Hero Section" de forma exclusiva y desplegar el catálogo bajo demanda. Posteriormente, al evaluar la versión de escritorio del mismo referente, se identificó que la navegación en 2 columnas (Sidebar + Contenido) era más eficiente que las pestañas (Tabs) superiores, lo cual derivó en una refactorización de layout full-stack.
+
+### Decisiones de Diseño e Ingeniería
+
+**1. Intercambio de Vistas (SPA Behavior)**
+- **Problema:** En páginas estáticas sin router (como este MVP), cambiar visualmente de "Inicio" a "Catálogo" de manera abrupta suele hacerse con enlaces de ancla (anchor links) que hacen un scroll súbito.
+- **Decisión:** Al presionar los botones "Ver Carta" o "Menú", se interceptará el evento para alternar la visibilidad entre el bloque `.hero` y `#menu` mediante CSS (`display: none` / `block`), además de realizar un `scrollTo(0,0)`. Esto imita el comportamiento ágil y sin fricción de una Single Page Application real, mejorando radicalmente la percepción de velocidad de la plataforma.
+
+**2. Sidebar Layout (Desktop)**
+- **Decisión:** Sustituir la navegación mediante pestañas (Tabs) por una barra lateral (`Sidebar`) a la izquierda.
+- **Ventaja Técnica:** Los layouts de *Sidebar* escalan infinitamente frente a la cantidad de categorías. En un Tab Layout, si las categorías exceden el ancho de pantalla, se obliga a incorporar scroll horizontal (aumentando la fricción en Desktop). Con un Sidebar, la lista fluye libremente y se fija en pantalla (`position: sticky`) para acompañar la vista del catálogo.
+
+**3. Acordeón Vertical Exclusivo (Móvil)**
+- **Problema:** El selector nativo `<select>` en móviles no permitía previsualizar de un vistazo qué categorías existían sin interactuar primero.
+- **Decisión:** Implementar un **Acordeón Clásico**. En este diseño, el código renderiza *todas* las categorías en el DOM bajo la forma de contenedores `<div class="catalog__category-group">`. El contenido se oculta vía CSS (`display: none`) salvo para el elemento que contiene la clase `.is-expanded`.
+- **Lógica de Estado Mutuamente Excluyente:** Se ha estipulado (a petición explícita del usuario) que **solo una categoría pueda estar expandida a la vez en dispositivos móviles**. Si un grupo se expande, JS buscará activamente iterar y remover `.is-expanded` de todos los grupos inactivos, priorizando el estado compacto de la interfaz. La categoría "Promos" se define como el valor por defecto `.is-expanded` (producto top o *Best Seller*).
+
+**4. Optimización de Renderizado (El fin de la re-renderización)**
+- **Nuevo Paradigma (Fase 2.5):** Ahora, `renderCatalog()` se invoca **una sola vez** al inicio. Inyecta todas las categorías agrupadas en el DOM. El filtrado (tanto el Sidebar en Desktop como el Acordeón en Móvil) pasa a ser **puramente visual**: un evento añade la clase `.is-active-tab` o `.is-expanded` al grupo, y CSS dicta su visibilidad. Esto es muchísimo más ligero computacionalmente y libre de parpadeos.
+
+---
+
+## Razonamiento Técnico — Pulido Premium UX/UI (Fase 2.6)
+
+### Contexto y Requerimiento
+Tras el éxito de la Fase 2.5 (SPA + Sidebar + Acordeón), la estructura de navegación era perfecta funcionalmente, pero carecía de "alma". Se percibía abrupta y utilitaria. El usuario aprobó un plan para implementar micro-interacciones (animaciones, toasts, FAB) para equiparar la experiencia a una app nativa premium como UberEats o PedidosYa.
+
+### Decisiones de Diseño e Ingeniería
+
+**1. Transiciones SPA (Animación de entrada CSS)**
+- **Problema:** Cambiar vistas con `display: none` produce un salto instantáneo, violando el principio UX de continuidad espacial.
+- **Decisión:** Implementar animaciones CSS (keyframes) tipo `fadeInSlideUp` cada vez que el `.hero`, `.catalog` o `.info-section` adquieren su clase activa. Es una solución de muy bajo costo computacional (100% GPU-accelerated) que mejora enormemente la percepción visual sin necesitar librerías complejas como Framer Motion o React Transition Group.
+
+**2. Toasts vs Drawer Invasivo**
+- **Problema:** En fases anteriores, agregar un producto abría automáticamente el carrito para dar feedback. Esto creaba fricción masiva para usuarios intentando agregar múltiples ítems de forma rápida.
+- **Decisión:** Detener el auto-open del carrito. Reemplazarlo por un componente `Toast` asíncrono que entra y sale de pantalla por sí solo (3 segundos) informando éxito ("🍣 Agregado al pedido").
+- **Flujo Especial:** Si el usuario está agregando un "Roll a la carta" (que requiere abrir modal para seleccionar relleno), el Toast aparece de forma confirmatoria una vez que el usuario presiona "Agregar" *dentro* de ese modal.
+
+**3. FAB Móvil Full-Width (Conversión)**
+- **Decisión:** En móvil, cuando el usuario hace scroll hacia abajo leyendo el catálogo en acordeón, el botón de carrito del header se vuelve distante para el pulgar de una sola mano. Un **FAB (Floating Action Button) dinámico** anclado al fondo (`bottom: 0`, full width) asegura que el Call To Action ("Ver mi pedido ($X)") sea ineludible e hiper-accesible siempre que haya >0 ítems. Este componente desaparece inmediatamente cuando el carrito se vacía.
+
+**4. Acordeón Fluido con CSS Grid**
+- **Problema:** El Acordeón móvil funcionaba cambiando el `display` del contenido. Provocaba que el alto saltara de 0 a X instantáneamente.
+- **Decisión:** Evitar JavaScript complejo (calculando alturas variables) para animar el acordeón. En su lugar, se explotará el estándar CSS Grid con `grid-template-rows: 0fr -> 1fr`, que permite transicionar suavemente la altura de un contenedor desde `0` hasta su tamaño intrínseco (`auto`). Para esto se requiere un `div` interno extra (wrapper con `min-height: 0` y `overflow: hidden`), logrando una sensación nativa con puro CSS.
+
+---
+
+## Bugfix: Botones Cortados en Tarjetas (Flexbox Wrap)
+
+### Análisis
+Se reportó que en vistas medias (donde se generan 3-4 columnas), el ancho de cada `.card` se reduce a ~250px. Al tener un precio en chip y un botón "Agregar" en la misma fila bajo `justify-content: space-between` (sin `flex-wrap: wrap`), los elementos chocan y fuerzan al botón a empujar los límites. Debido a que `.card` tiene `overflow: hidden`, el botón resultaba mutilado visualmente.
+
+### Decisión Técnica
+En vez de recurrir a Media Queries complejas basadas en anchos de tarjeta, la solución adoptada usa las propiedades intrínsecas de Flexbox:
+- **`flex-wrap: wrap`** y **`gap: var(--spacing-sm)`** en `.card__footer`.
+- **`flex-grow: 1`** en `.btn`.
+De esta forma, cuando el contenedor no tiene espacio para ambos elementos lado a lado, el botón salta a una nueva línea de forma natural. Al tener `flex-grow: 1`, el botón ocupará todo el ancho disponible, convirtiéndose en un CTA masivo altamente efectivo para dispositivos móviles (o grillas estrechas), sin mutilarse ni requerir cálculos matemáticos.
+
+---
+
+## Fase 2.7: Estandarización de Microcopy (Toast)
+
+### Contexto y Requerimiento
+El negocio solicitó evaluar la incorporación de un mensaje temporal de 3 segundos con la frase exacta: `"Tu selección se ha agregado al carrito"`. Como la infraestructura del componente Toast ya se implementó en la Fase 2.6, el esfuerzo se redujo únicamente a actualizar el *microcopy*.
+
+### Decisión de Diseño (UX)
+- Se optó por utilizar una frase estándar y tranquilizadora en lugar de concatenar dinámicamente el nombre del producto, lo que previene problemas visuales si el nombre del producto es excesivamente largo.
+- Se incluyó el emoji `✅` (visto verde) al principio de la frase, ya que los indicadores visuales procesan la retroalimentación de éxito más rápido cognitivamente que el texto puro.

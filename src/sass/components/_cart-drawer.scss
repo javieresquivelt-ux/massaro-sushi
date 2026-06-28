@@ -80,6 +80,14 @@
   color: var(--color-text-muted);
   padding: 3rem 1rem;
   font-size: 0.95rem;
+
+  &::before {
+    content: '🛒';
+    display: block;
+    font-size: 3rem;
+    margin-bottom: 1rem;
+    opacity: 0.4;
+  }
 }
 
 .cart-drawer__items {

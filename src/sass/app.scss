@@ -24,10 +24,12 @@
 @use 'components/cart-drawer';
 @use 'components/modal';
 @use 'components/checkout';
+@use 'components/fab';
 
 // 6. Pages
 @use 'pages/hero';
 @use 'pages/catalog';
+@use 'pages/info';
 
 // 7. Themes
 @use 'themes/light';
