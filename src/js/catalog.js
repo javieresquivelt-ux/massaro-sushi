@@ -1,6 +1,6 @@
 import { products, categories, getProductsByCategory, getCategoryName, formatPrice } from '../data/menu.js';
 import { addToCart } from './cart.js';
-export function renderCatalog() {
+export function renderCatalog(expandPromos = true) {
   const catalogContent = document.querySelector('.catalog__content');
   if (!catalogContent) return;
 
@@ -11,7 +11,7 @@ export function renderCatalog() {
     const items = getProductsByCategory(cat.id);
     if (!items.length) return;
 
-    const isDefault = cat.id === defaultCategory;
+    const isDefault = cat.id === defaultCategory && expandPromos;
 
     html += `<div class="catalog__category-group${isDefault ? ' is-expanded is-active-tab' : ''}" data-category-group="${cat.id}">
       <button class="catalog__accordion-header">
@@ -100,14 +100,15 @@ function handleAddToCart(productId) {
   }
 }
 
-export function initCatalogSidebar() {
+export function initCatalogSidebar(activeCategory = 'promos') {
   const sidebar = document.querySelector('.catalog__sidebar');
   const catalogContent = document.querySelector('.catalog__content');
   if (!sidebar || !catalogContent) return;
 
-  categories.forEach((cat, index) => {
+  categories.forEach((cat) => {
     const btn = document.createElement('button');
-    btn.className = `catalog__sidebar-btn${index === 0 ? ' catalog__sidebar-btn--active' : ''}`;
+    const isActive = activeCategory && cat.id === activeCategory;
+    btn.className = `catalog__sidebar-btn${isActive ? ' catalog__sidebar-btn--active' : ''}`;
     btn.dataset.category = cat.id;
     btn.textContent = cat.name;
     sidebar.appendChild(btn);

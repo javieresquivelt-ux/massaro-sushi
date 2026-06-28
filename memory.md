@@ -781,3 +781,42 @@ El negocio solicitó evaluar la incorporación de un mensaje temporal de 3 segun
 ### Decisión de Diseño (UX)
 - Se optó por utilizar una frase estándar y tranquilizadora en lugar de concatenar dinámicamente el nombre del producto, lo que previene problemas visuales si el nombre del producto es excesivamente largo.
 - Se incluyó el emoji `✅` (visto verde) al principio de la frase, ya que los indicadores visuales procesan la retroalimentación de éxito más rápido cognitivamente que el texto puro.
+
+---
+
+## Mejora UX: Diferenciar "Menú" (colapsado) vs "Pedir Ahora" (Promos abierto) — 2026-06-28
+
+### Contexto
+El usuario notó que tanto "Menú" (header/hero) como "Pedir Ahora" abren la carta con Promos expandido. Quiere que "Menú" muestre la carta con todas las categorías colapsadas para que el usuario decida qué explorar, mientras "Pedir Ahora" mantiene el comportamiento actual de mostrar Promos destacado.
+
+### Análisis de comportamiento actual
+Actualmente `showMenu()` es la única función para abrir el catálogo. `renderCatalog()` inyecta `is-expanded` y `is-active-tab` en la categoría `promos` por defecto (línea 14-16 de `catalog.js`). `initCatalogSidebar()` crea el primer botón del sidebar con `--active`. No hay manera de abrir el catálogo en estado "todo colapsado".
+
+### Decisión de diseño
+- **Móvil**: "Menú" abre carta colapsada (todas las categorías cerradas). "Pedir Ahora" abre con Promos expandido.
+- **Desktop**: Se mantiene igual (Promos visible) porque el sidebar siempre muestra alguna categoría y tener el contenido vacío sería confuso.
+- La diferencia real es en móvil, donde el acordeón permite ver todo colapsado como punto de partida neutral.
+
+### Solución técnica
+1. `renderCatalog()` recibe `expandPromos` (default `true`). Si es `false`, no asigna `is-expanded` ni `is-active-tab`.
+2. `initCatalogSidebar()` recibe `activeCategory` (default `'promos'`). Si es `null`, ningún botón se marca activo.
+3. Nueva función `showMenuCollapsed()` en `main.js` que re-renderiza el catálogo con ambos parámetros desactivados y luego refresca el sidebar.
+4. `btn-show-menu` y `btn-hero-menu` usan `showMenuCollapsed()`. `btn-order-now` mantiene `showMenu()`.
+
+### Archivos modificados
+- `src/js/catalog.js` — `renderCatalog(expandPromos = true)`: si es `false`, no asigna `is-expanded` ni `is-active-tab`. `initCatalogSidebar(activeCategory = 'promos')`: si es `null`, ningún botón se marca activo.
+- `src/main.js` — Nueva función `showMenuCollapsed()` que re-renderiza el catálogo vía `renderCatalog(false)` y sidebar vía `initCatalogSidebar(null)`. `btn-show-menu` y `btn-hero-menu` ahora usan `showMenuCollapsed()`. `btn-order-now` mantiene `showMenu()`.
+
+### Ejecución inicial (con bug)
+Build exitoso (559ms). Pero `showMenuCollapsed()` se aplicaba en desktop también, colapsando el sidebar y contenido en ambos viewports.
+
+### Bugfix: showMenuCollapsed rompe acordeón en móvil + afecta desktop
+**Problema 1**: `showMenuCollapsed()` se aplicaba en desktop colapsando el sidebar.
+
+**Solución**: Agregar guard `if (window.innerWidth >= 768)` que deriva a `showMenu()`.
+
+**Problema 2**: `showMenuCollapsed()` ejecutaba `initCatalogSidebar(null)` después de `renderCatalog(false)`. Esto duplicaba event listeners en `catalogContent` (el listener del acordeón y del sidebar se asignaban de nuevo), causando que el acordeón dejara de responder a los clics.
+
+**Solución**: Eliminar la llamada a `initCatalogSidebar()` y la limpieza de botones del sidebar dentro de `showMenuCollapsed()`. Los event listeners por delegación sobre `catalogContent` ya funcionan correctamente con el nuevo HTML generado por `renderCatalog(false)`. No es necesario re-crear el sidebar ni re-asignar listeners.
+
+**Archivo modificado**: `src/main.js` — Simplificado `showMenuCollapsed()`: solo llama a `renderCatalog(false)` y muestra la sección.

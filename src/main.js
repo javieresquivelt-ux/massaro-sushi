@@ -9,6 +9,8 @@ function initSpaNavigation() {
   const heroSection = document.getElementById('hero-section');
   const menuSection = document.getElementById('menu');
   const infoSection = document.getElementById('info-section');
+  const catalogContent = document.querySelector('.catalog__content');
+  const sidebar = document.querySelector('.catalog__sidebar');
   const btnHeroMenu = document.getElementById('btn-hero-menu');
   const btnShowMenu = document.getElementById('btn-show-menu');
   const btnShowHero = document.getElementById('btn-show-hero');
@@ -33,6 +35,19 @@ function initSpaNavigation() {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
+  const showMenuCollapsed = () => {
+    if (window.innerWidth >= 768) {
+      showMenu();
+      return;
+    }
+    hideAllSections();
+    if (catalogContent) {
+      renderCatalog(false);
+    }
+    menuSection?.classList.add('catalog--active');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
   const showInfo = () => {
     if (window.innerWidth >= 768) {
       const footer = document.querySelector('.footer');
@@ -44,8 +59,8 @@ function initSpaNavigation() {
     }
   };
 
-  if (btnHeroMenu) btnHeroMenu.addEventListener('click', showMenu);
-  if (btnShowMenu) btnShowMenu.addEventListener('click', (e) => { e.preventDefault(); showMenu(); });
+  if (btnHeroMenu) btnHeroMenu.addEventListener('click', showMenuCollapsed);
+  if (btnShowMenu) btnShowMenu.addEventListener('click', (e) => { e.preventDefault(); showMenuCollapsed(); });
   if (btnShowHero) btnShowHero.addEventListener('click', (e) => { e.preventDefault(); showHero(); });
   if (btnShowInfo) btnShowInfo.addEventListener('click', (e) => { e.preventDefault(); showInfo(); });
   if (btnOrderNow) btnOrderNow.addEventListener('click', (e) => { e.preventDefault(); showMenu(); });

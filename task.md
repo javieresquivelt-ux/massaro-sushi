@@ -963,3 +963,59 @@ checkout.js → setDeliveryMode('pickup')
 - [x] `npm run build` → sin errores
 - [x] Prueba manual: agregar producto, hacer clic en el FAB → debe abrir el drawer.
 - [x] `./init.sh` → 57/57 checks pasados
+
+---
+
+## ✨ Mejora UX: Diferenciar "Menú" (todo colapsado) vs "Pedir Ahora" (Promos abierto)
+
+> **Problema**: Actualmente "Menú" (header/hero) y "Pedir Ahora" ejecutan `showMenu()` que abre la carta con Promos expandido. El usuario quiere que "Menú" abra la carta **con todas las categorías colapsadas** (móvil), mientras "Pedir Ahora" mantiene Promos expandido.
+>
+> **Comportamiento acordado**:
+> | Acción | Móvil | Desktop |
+> |---|---|---|
+> | Menú / Ver Menú | Carta abierta, todas las categorías colapsadas | Igual que hoy (Promos visible) — sin cambios |
+> | Pedir Ahora | Promos expandido (comportamiento actual) | Promos visible (comportamiento actual) |
+>
+> **Decisión**: En desktop se mantiene igual porque el sidebar muestra Promos por defecto y no tiene sentido mostrar un sidebar sin contenido visible.
+
+### Archivos a modificar:
+- `src/main.js` — Nueva función `showMenuCollapsed()` que llama a `renderCatalog()` y `initCatalogSidebar()` con parámetro para colapsar todo.
+- `src/js/catalog.js` — `renderCatalog()` acepta parámetro `expandPromos` (default `true`). Si `false`, no agrega `is-expanded` ni `is-active-tab`. `initCatalogSidebar()` acepta `activeCategory` (default `'promos'`).
+
+### Cambios específicos:
+
+- [x] **`src/js/catalog.js`** — `renderCatalog()` añadir parámetro `expandPromos = true`. Si es `false`, no inyecta `is-expanded is-active-tab`.
+- [x] **`src/js/catalog.js`** — `initCatalogSidebar()` acepta parámetro `activeCategory = 'promos'`. Si es `null`, ningún botón se marca activo.
+- [x] **`src/main.js`** — Nueva función `showMenuCollapsed()`: re-renderiza el catálogo sin expandir y sidebar sin activo.
+- [x] **`src/main.js`** — `btn-show-menu` y `btn-hero-menu` llaman a `showMenuCollapsed()`. `btn-order-now` mantiene `showMenu()`.
+
+### Comportamiento detallado:
+- **Móvil "Menú"**: El acordeón se renderiza **sin** `is-expanded` en ninguna categoría (todas colapsadas). El usuario toca cualquier categoría para expandirla.
+- **Móvil "Pedir Ahora"**: Promos se expande.
+- **Desktop**: sin cambios — Promos visible siempre.
+
+### Validación:
+- [x] `npm run build` → sin errores
+
+---
+
+## 🐛 Bugfix: showMenuCollapsed rompe acordeón en móvil + afecta desktop
+
+> **Problema 1**: `showMenuCollapsed()` se aplicaba en desktop colapsando el sidebar.
+> **Solución**: Guard condicional `if (window.innerWidth >= 768)` que deriva a `showMenu()`.
+>
+> **Problema 2**: `showMenuCollapsed()` llamaba a `initCatalogSidebar(null)` que duplicaba event listeners en `catalogContent`, causando que el acordeón dejara de responder.
+> **Solución**: Eliminar la re-ejecución de `initCatalogSidebar()`. Los listeners por delegación sobre `catalogContent` ya funcionan con el nuevo HTML de `renderCatalog(false)`.
+
+### Paso 1 — Guard condicional en showMenuCollapsed
+- [x] `src/main.js` — Si desktop, deriva a `showMenu()`.
+
+### Paso 2 — Eliminar re-asignación de sidebar/listeners
+- [x] `src/main.js` — Eliminar `initCatalogSidebar(null)` y limpieza de botones.
+
+### Paso 3 — Validación
+- [x] `npm run build` → sin errores (583ms)
+- [ ] Desktop: Menú y Pedir Ahora → Promos visible
+- [ ] Móvil: clic "Menú" → todo colapsado, al tocar categoría se expande
+- [ ] Móvil: clic "Pedir Ahora" → Promos expandido
+- [ ] `./init.sh` → 57/57 checks pasados
