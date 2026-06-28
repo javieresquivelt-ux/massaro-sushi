@@ -820,3 +820,14 @@ Build exitoso (559ms). Pero `showMenuCollapsed()` se aplicaba en desktop tambié
 **Solución**: Eliminar la llamada a `initCatalogSidebar()` y la limpieza de botones del sidebar dentro de `showMenuCollapsed()`. Los event listeners por delegación sobre `catalogContent` ya funcionan correctamente con el nuevo HTML generado por `renderCatalog(false)`. No es necesario re-crear el sidebar ni re-asignar listeners.
 
 **Archivo modificado**: `src/main.js` — Simplificado `showMenuCollapsed()`: solo llama a `renderCatalog(false)` y muestra la sección.
+
+### Actualización de datos del footer (2026-06-28)
+
+Se actualizaron los datos de contacto y dirección del negocio en ambas secciones del HTML (`footer__info` e `info-section`):
+
+- **Dirección**: de "Quilicura — Despacho $2.000" a "Lo Ovalle 0305, Quilicura"
+- **Horarios**: de "Lun — Dom, 12:00 — 22:00 hrs" a "Dom-Jue: 17:00-22:00 / Vie-Sáb: 17:00-23:00"
+- **Email**: de "info@massaro.cl" a "vidalrodrigo2704@gmail.com"
+- Se renombró la sección "Delivery" por "Dirección" en ambos bloques.
+
+**Archivo modificado**: `index.html` — 2 bloques de información del negocio.
