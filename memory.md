@@ -979,3 +979,62 @@ Se actualizaron los datos de contacto y dirección del negocio en ambas seccione
    - Eliminados estilos legacy: `__content`, `__footer`.
 
 **Validación**: `npm run build` (569ms) ✅ — `./init.sh` (57/57) ✅
+
+---
+
+## 🐛 Bugfix 2.12.1: Imagen de Promos no colapsa y toggle no expande detalles (2026-06-28)
+
+### Reporte
+El usuario reportó que en la vista móvil, las cards de Promos muestran la imagen siempre visible (no se colapsan). Al hacer clic en la cabecera el indicador `▼` gira pero no se ve ningún cambio en los detalles de la composición. Las cards de productos regulares (Rolls, Especiales, etc.) sí funcionan correctamente.
+
+### Diagnóstico
+
+**Bug 1 — Imagen fuera del contenedor colapsable** (`src/js/catalog.js:74-78`):
+El template de `promo-card` tiene la imagen-wrapper dentro del `promo-card__compact-header` (cabecera siempre visible), NO dentro de `promo-card__compact-details` (contenido colapsable). Esto es un error de diseño del template: las cards regulares sí tienen la imagen dentro de `card__compact-details`, pero las promos no.
+
+Estructura actual incorrecta:
+```
+promo-card
+├── __compact-header (siempre visible)
+│   ├── __image-wrapper ← IMAGEN AQUÍ (mal — siempre visible)
+│   ├── __compact-header-info (nombre, precio, botón)
+│   └── __toggle-icon ▼
+└── __compact-details (colapsable)
+    └── __compact-details-inner
+        └── __desc ← solo descripción (no hay imagen para expandir)
+```
+
+Estructura correcta (cards regulares):
+```
+card
+├── __compact-header (siempre visible)
+│   ├── __compact-header-info (nombre, badges, precio)
+│   ├── btn "Agregar"
+│   └── __toggle-icon ▼
+└── __compact-details (colapsable)
+    └── __compact-details-inner
+        ├── __image-wrapper ← IMAGEN AQUÍ (bien)
+        └── __desc
+```
+
+**Bug 2 — Sin affordance visual de expansión**: La cabecera tiene `cursor: pointer` y `data-action="toggle-details"`, pero el toggle `▼` es pequeño y no hay suficiente indicación visual de que se puede hacer clic para expandir. Sin embargo, el toggle en sí funciona (gira 180°), pero como no hay contenido nuevo que mostrar (la imagen ya está visible arriba), el usuario no percibe cambio.
+
+### Solución planificada
+
+**Paso 1 — Mover imagen a detalles**: Reubicar `promo-card__image-wrapper` y `promo-card__pieces` dentro de `promo-card__compact-details / promo-card__compact-details-inner`. La cabecera se queda solo con nombre, precio, botón Agregar y toggle `▼`. El pieces badge se muestra inline en el nombre de la cabecera para que el usuario sepa las piezas sin expandir.
+
+**Paso 2 — Ajustar CSS de image-wrapper**: Cuando la imagen está dentro de `__compact-details`, el `width: 100px` (móvil) / `200px` (desktop) heredado del selector existente no aplica. Debe ocupar el 100% del ancho disponible (como las cards regulares). Se anulará con un selector anidado dentro de `__compact-details-inner`.
+
+**Archivos a modificar**:
+- `src/js/catalog.js` — Template de promo-card: mover image-wrapper a detalles
+- `src/sass/pages/_catalog.scss` — Resetear width de image-wrapper dentro de detalles
+
+### Ejecución Bugfix 2.12.1 (2026-06-28)
+
+**Implementado**:
+
+1. **Template JS** (`catalog.js`): La imagen-wrapper (`promo-card__image-wrapper`) y el badge de pieces se movieron del `promo-card__compact-header` al `promo-card__compact-details / promo-card__compact-details-inner`. La cabecera ahora solo muestra nombre (con inline "— 13 pz."), precio, botón Agregar y toggle `▼`.
+
+2. **CSS Promos** (`_catalog.scss`): Dentro de `__compact-details-inner`, el `__image-wrapper` ahora usa `width: 100%` con `aspect-ratio: 3/2` (mismo patrón que las cards regulares). El ancho fijo de 100px (móvil) / 200px (desktop) solo aplica cuando la imagen está en la cabecera (que ya no es el caso).
+
+**Validación**: `npm run build` (575ms) ✅ — `./init.sh` (57/57) ✅

@@ -1104,3 +1104,33 @@ Revertir estructura HTML a su estado original y mantener solo `100dvh` + `safe-a
 - [ ] Botón "Agregar" funciona tanto colapsado como expandido
 - [x] `./init.sh` → 57/57 checks pasados
 
+---
+
+## 🐛 Bugfix 2.12.1: Imagen de Promos no se colapsa y toggle no expande detalles
+
+> **Problema reportado**: Las cards de Promos muestran la imagen siempre visible (no minimizada). Al hacer clic en la cabecera el toggle no expande los detalles de la composición de la promo.
+>
+> **Diagnóstico completo**: Documentado en `memory.md` → "Bugfix 2.12.1".
+
+### Causa raíz
+
+**Bug 1 — Imagen fuera del contenedor colapsable**: En el template de `promo-card` (`catalog.js`), `promo-card__image-wrapper` y `promo-card__pieces` están dentro del `promo-card__compact-header`, NO dentro de `promo-card__compact-details`. La imagen siempre es visible aunque los detalles estén colapsados.
+
+**Bug 2 — solo descripción en detalles**: El contenedor `promo-card__compact-details` solo contiene la descripción (`promo-card__desc`), no la imagen. Por eso al hacer clic en expandir no se ve cambio visual apreciable.
+
+### Solución planificada
+
+### Paso 1 — Mover imagen a detalles colapsables
+- [x] `src/js/catalog.js` — Mover `promo-card__image-wrapper` y `promo-card__pieces` desde `promo-card__compact-header` a `promo-card__compact-details / promo-card__compact-details-inner`.
+- [x] La cabecera se queda solo con: nombre (con inline pieces badge "13 pz."), precio, botón Agregar y toggle `▼`.
+
+### Paso 2 — Ajustar CSS de image-wrapper dentro de detalles
+- [x] `src/sass/pages/_catalog.scss` — Dentro de `__compact-details-inner`, el `__image-wrapper` ahora tiene `width: 100%` y `aspect-ratio: 3/2` (como las cards regulares), sin el ancho fijo de 100px.
+
+### Paso 3 — Validación
+- [x] `npm run build` → sin errores (575ms)
+- [ ] Vista móvil: Promos colapsadas (solo nombre + precio + botón + ▼). Al tocar se expanden con imagen + pieces + descripción
+- [ ] Botón "Agregar" funciona tanto colapsado como expandido
+- [ ] Desktop: sin cambios, todo visible
+- [x] `./init.sh` → 57/57 checks pasados
+

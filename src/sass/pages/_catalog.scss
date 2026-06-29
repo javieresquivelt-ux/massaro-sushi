@@ -374,6 +374,18 @@
     &__compact-details-inner {
       overflow: hidden;
       min-height: 0;
+
+      .promo-card__image-wrapper {
+        width: 100%;
+        aspect-ratio: 3 / 2;
+        min-height: auto;
+        border-radius: 0;
+
+        @media (min-width: 768px) {
+          width: 100%;
+          min-height: auto;
+        }
+      }
     }
 
     &__desc {

@@ -72,12 +72,8 @@ export function renderCatalog(expandPromos = true) {
       html += promos.map(promo => `
         <article class="promo-card" data-product-id="${promo.id}">
           <div class="promo-card__compact-header" data-action="toggle-details">
-            <div class="promo-card__image-wrapper">
-              <img src="${promo.image}" alt="${promo.name}" class="promo-card__image" loading="lazy" />
-              <span class="promo-card__pieces">${promo.pieces} pz.</span>
-            </div>
             <div class="promo-card__compact-header-info">
-              <h3 class="promo-card__name">${promo.name}</h3>
+              <h3 class="promo-card__name">${promo.name} — ${promo.pieces} pz.</h3>
               <div class="promo-card__compact-header-meta">
                 <span class="promo-card__price">${formatPrice(promo.price)}</span>
                 <button class="btn btn--primary">Agregar</button>
@@ -87,6 +83,10 @@ export function renderCatalog(expandPromos = true) {
           </div>
           <div class="promo-card__compact-details">
             <div class="promo-card__compact-details-inner">
+              <div class="promo-card__image-wrapper">
+                <img src="${promo.image}" alt="${promo.name}" class="promo-card__image" loading="lazy" />
+                <span class="promo-card__pieces">${promo.pieces} pz.</span>
+              </div>
               <p class="promo-card__desc">${promo.description}</p>
             </div>
           </div>
