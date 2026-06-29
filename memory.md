@@ -831,3 +831,31 @@ Se actualizaron los datos de contacto y dirección del negocio en ambas seccione
 - Se renombró la sección "Delivery" por "Dirección" en ambos bloques.
 
 **Archivo modificado**: `index.html` — 2 bloques de información del negocio.
+
+### Corrección Visual de Contraste (2026-06-28)
+
+**Problema reportado**: El botón secundario amarillo ("Personalizar pedido") y los chips de precios presentaban texto blanco, lo cual tiene un contraste muy pobre sobre amarillo y ensucia la UX/UI, incumpliendo las normas de accesibilidad.
+
+**Análisis Técnico**: En `_buttons.scss`, la clase `.btn--secondary` declaraba explícitamente `color: var(--color-black)`. Sin embargo, el token `--color-black` nunca fue inicializado en el `:root` (`_light.scss`) ni en el selector `[data-theme="dark"]` (`_dark.scss`). Debido a esta omisión, el navegador ignoraba la instrucción y aplicaba el color de texto por defecto que heredaba del body. En el modo oscuro, este color por defecto es blanco (`var(--text-color)`), lo que causaba el fallo visual.
+
+**Decisión basada en Mercado**: Plataformas como PedidosYa o MercadoLibre utilizan fondos amarillos siempre con texto oscuro (negro/gris muy oscuro) para garantizar una legibilidad inmediata.
+
+**Solución**: Se inyectó la variable `--color-black: #{var.$color-black};` tanto en `_light.scss` como en `_dark.scss`. Esto restauró el comportamiento esperado en `.btn--secondary`, volviendo el texto negro sin requerir hardcodeo en el componente.
+
+**Validación**: `npm run build` exitoso (571ms) y `./init.sh` con 57/57 checks.
+
+### Refactorización a Vistas Compactas (2026-06-28)
+
+**Problema de Negocio**: La visualización actual del catálogo forzaba imágenes grandes y descripciones largas por defecto para todas las tarjetas. Esto generaba mucho scroll (fatiga visual) y obligaba a descargar todas las imágenes, lo que ralentizaba la toma de decisión para clientes recurrentes que ya saben qué pedir.
+
+**Decisión basada en Mercado (Benchmark)**: Las grandes apps de Delivery (UberEats, PedidosYa) resuelven este problema minimizando el tamaño vertical de los ítems para mostrar mayor densidad de productos en pantalla. 
+- En Móvil: Usan listas de 1 columna altamente compactas.
+- En Desktop: Mantienen un formato compacto, pero lo organizan en Grillas (2 a 3 columnas) para no desperdiciar el enorme espacio horizontal y evitar columnas extremadamente anchas y vacías.
+
+**Arquitectura Aprobada (Enfoque Híbrido)**:
+Se decidió aplicar una refactorización estructural donde **todo el catálogo (incluyendo Promos)** usará un modelo de **Acordeón Individual**.
+1. **Oculto por defecto**: Solo se muestran título, precio, piezas, botón de agregar y un control "▼".
+2. **Despliegue a demanda**: Al clicar, se expande la imagen (con carga diferida / lazy load) y la descripción.
+3. **Responsive Inteligente**: Usaremos exactamente el mismo HTML para móvil y desktop. El CSS se encargará de presentarlos apilados en móvil (lista 1 columna) y en formato grilla adaptativa en pantallas anchas (Desktop), logrando lo mejor de ambos mundos sin código duplicado.
+
+*Nota operativa: El código de implementación será desarrollado por el agente de terminal OpenCode.*

@@ -1019,3 +1019,48 @@ checkout.js → setDeliveryMode('pickup')
 - [ ] Móvil: clic "Menú" → todo colapsado, al tocar categoría se expande
 - [ ] Móvil: clic "Pedir Ahora" → Promos expandido
 - [ ] `./init.sh` → 57/57 checks pasados
+
+---
+
+## 🎨 Fase 2.11: Optimización de Contraste en Botones (UX/UI)
+
+> **Objetivo**: Mejorar la legibilidad de los botones secundarios amarillos ("Personalizar pedido", chips de precios) asegurando que usen texto negro en lugar de blanco (que incumple normas WCAG de accesibilidad).
+
+### Paso 1 — Definir variable CSS faltante
+- [x] `src/sass/themes/_light.scss` — Añadir `--color-black: #{var.$color-black};`
+- [x] `src/sass/themes/_dark.scss` — Añadir `--color-black: #{var.$color-black};`
+
+### Paso 2 — Validación
+- [x] `npm run build` → verificar compilación sin errores
+- [x] `./init.sh` → validar que los checks de integridad pasen
+
+---
+
+## 🚀 Fase 2.12: Refactor UX/UI - Vistas de Catálogo Compactas (Híbrido)
+
+> **Objetivo**: Optimizar la velocidad de escaneo y carga del catálogo. Ocultar imágenes y descripciones por defecto, mostrando solo un resumen (Título, Piezas, Precio, Agregar) y un botón de acordeón.
+> **Diseño**: Aplicable a todas las categorías. Móvil = Lista de 1 columna. Desktop = Grilla de 2-3 columnas.
+
+### Paso 1 — Refactor del HTML (`src/js/catalog.js`)
+- [ ] Modificar `renderCatalog()` para unificar la estructura de `card` y `promo-card`.
+- [ ] Implementar la nueva estructura HTML dentro del template string:
+  - Crear un contenedor de cabecera (`.card__compact-header`) visible por defecto, con los datos clave y un botón `▼` (`.btn-toggle-details`).
+  - Crear un contenedor de detalles (`.card__compact-details`) que envuelva a `__image-wrapper` y `__desc`.
+
+### Paso 2 — Lógica de Acordeón en JS (`src/js/catalog.js`)
+- [ ] Añadir *Event Delegation* en el listener principal de `catalogContent` para capturar clics en la cabecera de las tarjetas o en el botón `▼`.
+- [ ] Al hacer clic, alternar (toggle) la clase `.is-expanded` en el elemento `<article>` correspondiente.
+- [ ] Asegurar que los clics en el botón "Agregar" utilicen `e.stopPropagation()` o no gatillen el acordeón para no interferir con la lógica del carrito.
+
+### Paso 3 — Ajustes CSS (`src/sass/components/_cards.scss` y `_catalog.scss`)
+- [ ] En `_cards.scss`, estilizar el nuevo bloque `.card__compact-header` con Flexbox para alinear título y precio/acciones.
+- [ ] En `_cards.scss`, ocultar `.card__compact-details` por defecto. Se recomienda usar el truco de CSS Grid (`display: grid; grid-template-rows: 0fr; transition: grid-template-rows 0.3s ease;`) en el contenedor, con un sub-contenedor con `overflow: hidden`.
+- [ ] Al tener el `<article>` la clase `.is-expanded`, cambiar `.card__compact-details` a `grid-template-rows: 1fr;`.
+- [ ] En `_catalog.scss`, asegurar que la cuadrícula del catálogo (`.catalog__grid` y `.catalog__promos`) se comporte como lista en móvil (`grid-template-columns: 1fr`) y grilla adaptativa en desktop (ej. `grid-template-columns: repeat(auto-fit, minmax(300px, 1fr))`).
+
+### Paso 4 — Validación y Pruebas
+- [ ] Ejecutar `npm run build` y asegurar compilación limpia.
+- [ ] Ejecutar `./init.sh` para verificar integridad.
+- [ ] Comprobar apertura y cierre del acordeón en ambas vistas.
+- [ ] Asegurar que el botón "Agregar" funciona sin problemas al estar colapsado o expandido.
+
