@@ -1336,7 +1336,36 @@ Las Promos no sufren este problema porque usan un layout diferente (imagen en ca
 
 ### Paso 3 — Validación
 - [x] `npm run build` → sin errores (552ms)
-- [ ] Desktop: nombre de producto completo visible, precio y botón en fila debajo
-- [ ] Móvil: sin cambios, cabecera compacta con todo en fila
+- [x] Desktop: nombre de producto completo visible, precio y botón en fila debajo
+- [x] Móvil: sin cambios, cabecera compacta con todo en fila
+- [x] `./init.sh` → 57/57 checks pasados
+
+---
+
+## 🐛 Bugfix 2.12.8: Texto amarillo desalineado en cards regulares desktop
+
+> **Problema reportado**: En desktop, en la categoría "Rolls a la Carta", el texto amarillo "Relleno: Pollo · Camarón · Kanikama · Salmón · Verdura" (`.card__variant-hint`) aparece desalineado entre tarjetas vecinas. Como todas las cards tienen 2 líneas de variant-hint, deberían alinearse al fondo de cada tarjeta para mejorar la UX visual.
+>
+> **Diagnóstico completo**: Documentado en `memory.md` → "Bugfix 2.12.8".
+
+### Causa raíz
+
+`card__compact-details-inner` no tiene `display: flex`, por lo que los elementos internos (imagen, descripción, variant-hint) fluyen en bloque normal. La descripción (`card__desc`) tiene longitud variable entre productos, lo que hace que el `variant-hint` quede a diferentes alturas en cada card.
+
+### Solución (solo desktop — sin cambios en móvil)
+
+### Paso 1 — Hacer que `card__compact-details-inner` use flex column en desktop
+- [x] `src/sass/components/_cards.scss` — En `min-width: 768px`: `display: flex; flex-direction: column; flex: 1`.
+
+### Paso 2 — Descripción con flex-grow en desktop
+- [x] `card__desc` en `min-width: 768px`: `flex-grow: 1` para que ocupe el espacio sobrante.
+
+### Paso 3 — Variant-hint al fondo en desktop
+- [x] `card__variant-hint` en `min-width: 768px`: `margin-top: auto` para que quede al fondo.
+
+### Paso 4 — Validación
+- [x] `npm run build` → sin errores (599ms)
+- [ ] Desktop: texto amarillo "Relleno: ..." alineado al fondo de todas las cards
+- [ ] Móvil: sin cambios, variant-hint visible al expandir
 - [x] `./init.sh` → 57/57 checks pasados
 

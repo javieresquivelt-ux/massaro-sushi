@@ -121,6 +121,12 @@
   &__compact-details-inner {
     overflow: visible;
     min-height: 0;
+
+    @media (min-width: 768px) {
+      display: flex;
+      flex-direction: column;
+      flex: 1;
+    }
   }
 
   // Contenedor de la imagen (más grande, aspect-ratio 3/2)
@@ -187,11 +193,19 @@
     font-size: 0.8rem;
     color: var(--color-secondary);
     margin: var(--spacing-sm) var(--spacing-md) var(--spacing-md);
+
+    @media (min-width: 768px) {
+      margin-top: auto;
+    }
   }
 
   &__desc {
     font-size: 0.9rem;
     color: var(--text-color-muted);
     margin: var(--spacing-sm) var(--spacing-md) var(--spacing-md);
+
+    @media (min-width: 768px) {
+      flex-grow: 1;
+    }
   }
 }

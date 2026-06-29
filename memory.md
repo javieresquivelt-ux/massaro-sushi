@@ -1423,3 +1423,53 @@ Las Promos no se ven afectadas porque no están en la grid (`catalog__promos` us
 ```
 
 **Validación**: `npm run build` (552ms) ✅ — `./init.sh` (57/57) ✅
+
+---
+
+## 🐛 Bugfix 2.12.8: Texto amarillo desalineado en cards regulares desktop (2026-06-28)
+
+### Reporte
+En desktop, en la categoría "Rolls a la Carta", el texto amarillo `.card__variant-hint` (ej. "Relleno: Pollo · Camarón · Kanikama · Salmón · Verdura") aparece a diferentes alturas en cada tarjeta porque la descripción tiene longitud variable. Esto genera una apariencia desordenada y perjudica la UX.
+
+### Causa raíz
+
+`card__compact-details-inner` no tiene `display: flex`. Sus hijos (imagen, descripción, variant-hint) están en flujo de bloque normal. La imagen ocupa altura fija (aspect-ratio 3/2), pero la descripción tiene longitud variable, empujando el variant-hint a diferentes alturas según el texto de cada producto.
+
+### Solución (solo desktop)
+
+Hacer que `card__compact-details-inner` sea un contenedor `flex-column` en desktop, dando `flex-grow: 1` a la descripción para que ocupe el espacio sobrante y empujando el `variant-hint` al fondo con `margin-top: auto`.
+
+**Layout resultante en desktop:**
+```
+┌─ card ─────────────────────────────────────────┐
+│ ┌─ card__compact-header (flex column) ───────┐ │
+│ │ Nombre completo                             │ │
+│ │ [Badge]  $5.000  [Agregar]                  │ │
+│ └─────────────────────────────────────────────┘ │
+│ ┌─ card__compact-details-inner (flex column) ─┐ │
+│ │ [imagen aspect-ratio 3/2]                    │ │
+│ │ descripción (flex-grow: 1, ocupa espacio)   │ │
+│ │ Relleno: Pollo · Camarón· ... (al fondo)   │ │
+│ └─────────────────────────────────────────────┘ │
+└─────────────────────────────────────────────────┘
+```
+
+### Archivos a modificar
+- `src/sass/components/_cards.scss` — 3 reglas con `min-width: 768px`
+
+### Validación esperada
+- Desktop: variant-hint alineado al fondo de todas las cards
+- Móvil: sin cambios
+- `./init.sh` (57/57) ✅
+
+### Ejecución Bugfix 2.12.8 (2026-06-28)
+
+**Implementado**:
+
+1. **CSS Cards** (`_cards.scss`):
+   - `card__compact-details-inner` en `min-width: 768px`: `display: flex; flex-direction: column; flex: 1`.
+   - `card__desc` en `min-width: 768px`: `flex-grow: 1` para ocupar el espacio entre imagen y variant-hint.
+   - `card__variant-hint` en `min-width: 768px`: `margin-top: auto` para que quede al fondo de cada card.
+   - Sin cambios en móvil (todo protegido con `min-width: 768px`).
+
+**Validación**: `npm run build` (599ms) ✅ — `./init.sh` (57/57) ✅
