@@ -371,6 +371,10 @@
       grid-template-rows: 1fr;
     }
 
+    .promo-card.is-expanded .card__toggle-icon {
+      transform: rotate(180deg);
+    }
+
     &__compact-details-inner {
       overflow: hidden;
       min-height: 0;

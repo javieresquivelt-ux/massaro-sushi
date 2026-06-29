@@ -1038,3 +1038,46 @@ card
 2. **CSS Promos** (`_catalog.scss`): Dentro de `__compact-details-inner`, el `__image-wrapper` ahora usa `width: 100%` con `aspect-ratio: 3/2` (mismo patrón que las cards regulares). El ancho fijo de 100px (móvil) / 200px (desktop) solo aplica cuando la imagen está en la cabecera (que ya no es el caso).
 
 **Validación**: `npm run build` (575ms) ✅ — `./init.sh` (57/57) ✅
+
+---
+
+## 🐛 Bugfix 2.12.2: Toggle de promos no gira el icono ▼ ni expande detalles (2026-06-28)
+
+### Reporte
+Tras el Bugfix 2.12.1, la imagen de las promos ya se colapsa correctamente (no se ve en la cabecera). Sin embargo, al hacer clic en la cabecera de una promo, el icono ▼ no gira y el usuario no percibe que se hayan expandido los detalles. Las cards regulares sí funcionan perfectamente.
+
+### Diagnóstico
+
+**Causa raíz — Regla CSS de toggle-icon solo existe para `.card`, no para `.promo-card`**:
+
+En `_cards.scss:87` existe la regla:
+```scss
+.card.is-expanded &__toggle-icon {
+    transform: rotate(180deg);
+}
+```
+Esto se compila a `.card.is-expanded .card__toggle-icon { transform: rotate(180deg); }`.
+
+Esta regla funciona para `<article class="card">` (productos regulares) porque el selector `.card.is-expanded` coincide. Pero las promos usan `<article class="promo-card">`, donde `.card.is-expanded` NO coincide, por lo que el icono nunca gira.
+
+Además, el usuario percibe que "no funciona" porque el único feedback visual del toggle es el giro del icono ▼. Sin ese giro, no hay indicación de que haya ocurrido algo, aunque el CSS de `promo-card.is-expanded .promo-card__compact-details { grid-template-rows: 1fr; }` sí se esté aplicando correctamente (la imagen y descripción se expanden, pero sin el icono girando el usuario no lo nota).
+
+### Solución planificada
+
+**Paso 1 — Añadir regla CSS para toggle-icon en promos**: En `_catalog.scss`, añadir:
+```scss
+.promo-card.is-expanded .card__toggle-icon {
+    transform: rotate(180deg);
+}
+```
+
+### Archivos a modificar
+- `src/sass/pages/_catalog.scss` — Añadir regla de rotación para `.promo-card.is-expanded .card__toggle-icon`
+
+### Ejecución Bugfix 2.12.2 (2026-06-28)
+
+**Implementado**:
+
+1. **CSS Promos** (`_catalog.scss`): Añadida la regla `.promo-card.is-expanded .card__toggle-icon { transform: rotate(180deg); }` justo después de la regla de expansión de detalles existente.
+
+**Validación**: `npm run build` (626ms) ✅ — `./init.sh` (57/57) ✅

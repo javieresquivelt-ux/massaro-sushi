@@ -1134,3 +1134,44 @@ Revertir estructura HTML a su estado original y mantener solo `100dvh` + `safe-a
 - [ ] Desktop: sin cambios, todo visible
 - [x] `./init.sh` → 57/57 checks pasados
 
+---
+
+## 🐛 Bugfix 2.12.2: Toggle de promos no gira el icono ▼ ni expande detalles
+
+> **Problema reportado**: Tras el Bugfix 2.12.1, la imagen de las promos ya está colapsada (no se ve), pero al hacer clic en la cabecera de una promo (ej. Promo 1), el icono ▼ no gira y no se expanden los detalles (imagen + descripción). Las cards regulares sí funcionan.
+>
+> **Diagnóstico completo**: Documentado en `memory.md` → "Bugfix 2.12.2".
+
+### Causa raíz
+
+**Bug — Regla CSS de toggle-icon solo existe para `.card`, no para `.promo-card`**:
+
+En `_cards.scss` línea 87:
+```scss
+.card.is-expanded &__toggle-icon {
+    transform: rotate(180deg);
+}
+```
+Esto se compila a `.card.is-expanded .card__toggle-icon`. Funciona para cards porque el `<article>` tiene clase `card`. Pero las promos usan `<article class="promo-card">`, por lo que esa regla CSS nunca se aplica. El usuario hace clic, el JS togglea `.is-expanded` en `promo-card`, pero el icono ▼ no gira y el usuario piensa que no funcionó.
+
+Además, el colapso de `promo-card__compact-details` sí está correctamente definido en `_catalog.scss`:
+```scss
+.promo-card.is-expanded &__compact-details {
+    grid-template-rows: 1fr;
+}
+```
+Esto sí funciona, pero sin el feedback visual del icono girando, el usuario no percibe el cambio.
+
+### Solución planificada
+
+### Paso 1 — Añadir regla CSS para toggle-icon en promos
+- [x] `src/sass/pages/_catalog.scss` — Añadida regla `.promo-card.is-expanded .card__toggle-icon { transform: rotate(180deg); }`
+
+### Paso 2 — Validación
+- [x] `npm run build` → sin errores (626ms)
+- [ ] Vista móvil: al hacer clic en cabecera de Promo 1, el icono ▼ gira y se expanden imagen + descripción
+- [ ] Botón "Agregar" funciona correctamente
+- [ ] Desktop: sin cambios, todo visible
+- [x] `./init.sh` → 57/57 checks pasados
+- [ ] **Revisión general**: Verificar que las cards regulares (Rolls, Especiales, etc.) sigan funcionando correctamente
+
