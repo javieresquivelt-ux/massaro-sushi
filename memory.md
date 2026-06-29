@@ -1145,5 +1145,76 @@ Se priorizó **robustez sobre animación suave**. El patrón CSS Grid `0fr → 1
 - `npm run build` (560ms) ✅
 - Vista móvil: Promos colapsadas, al tocar se expanden con imagen + pieces + descripción ✅
 - Botón "Agregar" funciona correctamente ✅
-- Desktop: sin cambios ✅
+- Desktop: sin cambios ❌ **(se detectó bug: imágenes de promos muy grandes en desktop)**
 - `./init.sh` (57/57) ✅
+
+---
+
+## 🐛 Bugfix 2.12.4: Imágenes de promos muy grandes en desktop (2026-06-28)
+
+### Reporte
+En desktop, las imágenes de las promos aparecen muy grandes, ocupando todo el ancho de la tarjeta con aspect-ratio 3/2. Esto rompe el layout visual que existía antes de la Fase 2.12, donde las promos tenían un diseño horizontal con imagen de 200px a la izquierda y el contenido (nombre, descripción, precio, botón) a la derecha.
+
+### Causa raíz
+
+Los cambios de Fase 2.12 (vistas compactas) modificaron la estructura HTML de las promos. Antes:
+
+```
+promo-card (flex-direction: row)
+├── __image-wrapper (200px fijo)
+└── __content (flex: 1)
+    ├── __name
+    ├── __desc
+    └── __footer (precio + botón)
+```
+
+Después de Fase 2.12:
+
+```
+promo-card (flex-direction: column)
+├── __compact-header (nombre + precio + botón + ▼)
+└── __compact-details (display: block en desktop)
+    └── __compact-details-inner
+        ├── __image-wrapper (width: 100%, aspect-ratio: 3/2) ← MUY GRANDE
+        └── __desc
+```
+
+El problema es que:
+1. `promo-card` pasó de `flex-direction: row` a `column`, perdiendo el layout horizontal.
+2. `__image-wrapper` dentro de `__compact-details-inner` tiene `width: 100%` con `aspect-ratio: 3/2`, lo que en desktop hace que la imagen ocupe todo el ancho de la card.
+3. No hay un layout flex horizontal dentro de `__compact-details-inner` que ponga la imagen al lado de la descripción.
+
+### Solución planificada
+
+**Paso 1 — Restaurar layout horizontal en desktop** (`_catalog.scss`):
+- `.promo-card` en `min-width: 768px`: `flex-direction: row`.
+- `.promo-card__compact-details` en desktop: `display: flex; flex-direction: row` para que imagen y descripción estén en fila.
+- `.promo-card__compact-details-inner` en desktop: `display: flex; flex-direction: row; gap: var(--spacing-md)`.
+- `.promo-card__image-wrapper` dentro de `__compact-details-inner` en desktop: `width: 200px` en lugar de `width: 100%`.
+
+Con esto, en desktop la promo tendrá:
+- Cabecera con nombre, precio, botón y toggle ▼ (en una fila).
+- Debajo, los detalles con imagen (200px) a la izquierda y descripción a la derecha.
+
+**Archivos a modificar**:
+- `src/sass/pages/_catalog.scss` — Ajustar layout de promo-card en desktop
+
+**Validación**:
+- Desktop: promos con imagen de 200px, layout horizontal
+- Móvil: promos colapsadas, al expandir imagen + descripción
+- `./init.sh` (57/57) ✅
+
+### Ejecución Bugfix 2.12.4 (2026-06-28)
+
+**Implementado**:
+
+1. **CSS Promos** (`_catalog.scss`): Se restauró el layout horizontal de las promos en desktop:
+   - `.promo-card` en `min-width: 768px`: `flex-direction: row` (vuelve al diseño horizontal original).
+   - `__compact-header` en desktop: `flex: 1` para ocupar el espacio disponible con nombre, precio y botón.
+   - `__compact-details` en desktop: `display: flex; flex-direction: row; align-items: flex-start` para que imagen y descripción estén en fila.
+   - `__compact-details-inner` en desktop: `display: flex; flex-direction: row; gap: var(--spacing-lg); padding: var(--spacing-md)`.
+   - `.promo-card__image-wrapper` dentro de detalles en desktop: `width: 200px; flex-shrink: 0; border-radius: var(--radius-md)` (vuelve al tamaño original de 200px).
+   - `__desc` en desktop: `flex: 1; padding: 0` para que fluya al lado de la imagen.
+   - Se eliminó el selector legacy `promo-card__image-wrapper` que estaba fuera de `__compact-details-inner` (ya no se usaba y podía causar confusión).
+
+**Validación**: `npm run build` (567ms) ✅ — `./init.sh` (57/57) ✅
