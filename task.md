@@ -1067,31 +1067,40 @@ Revertir estructura HTML a su estado original y mantener solo `100dvh` + `safe-a
 
 ---
 
-## 🚀 Fase 2.12: Refactor UX/UI - Vistas de Catálogo Compactas (Híbrido)
+## 🚀 Fase 2.12: Refactor UX/UI - Vistas de Catálogo Compactas
 
-> **Objetivo**: Optimizar la velocidad de escaneo y carga del catálogo. Ocultar imágenes y descripciones por defecto, mostrando solo un resumen (Título, Piezas, Precio, Agregar) y un botón de acordeón.
-> **Diseño**: Aplicable a todas las categorías. Móvil = Lista de 1 columna. Desktop = Grilla de 2-3 columnas.
+> **Objetivo**: Optimizar la velocidad de escaneo del catálogo en móvil ocultando imágenes y descripciones por defecto. Mostrar solo nombre, badges, precio y botón "Agregar". Al tocar la card se expande para revelar imagen, descripción y variantes.
+>
+> **Decisión de diseño**: Solo aplica en móvil (`max-width: 767px`). En desktop el comportamiento no cambia (todo visible siempre).
 
-### Paso 1 — Refactor del HTML (`src/js/catalog.js`)
-- [ ] Modificar `renderCatalog()` para unificar la estructura de `card` y `promo-card`.
-- [ ] Implementar la nueva estructura HTML dentro del template string:
-  - Crear un contenedor de cabecera (`.card__compact-header`) visible por defecto, con los datos clave y un botón `▼` (`.btn-toggle-details`).
-  - Crear un contenedor de detalles (`.card__compact-details`) que envuelva a `__image-wrapper` y `__desc`.
+### Paso 1 — Refactor de templates en `src/js/catalog.js`
+- [x] Modificar template de `card`: imagen-wrapper y descripción envueltos en `.card__compact-details`. Cabecera `.card__compact-header` con título, badges, precio, botón "Agregar" + `▼`.
+- [x] Modificar template de `promo-card`: misma lógica. Cabecera con imagen, nombre, precio, pieces badge, botón "Agregar" + `▼`. Descripción colapsable en `.promo-card__compact-details`.
+- [x] Añadir `data-action="toggle-details"` a la cabecera (`__compact-header`) en ambos templates.
+- [x] En el event delegation de "Agregar", añadir `e.stopPropagation()`.
 
-### Paso 2 — Lógica de Acordeón en JS (`src/js/catalog.js`)
-- [ ] Añadir *Event Delegation* en el listener principal de `catalogContent` para capturar clics en la cabecera de las tarjetas o en el botón `▼`.
-- [ ] Al hacer clic, alternar (toggle) la clase `.is-expanded` en el elemento `<article>` correspondiente.
-- [ ] Asegurar que los clics en el botón "Agregar" utilicen `e.stopPropagation()` o no gatillen el acordeón para no interferir con la lógica del carrito.
+### Paso 2 — Lógica de acordeón por card en `src/js/catalog.js`
+- [x] Añadir event delegation en `catalogContent` para capturar clics en `[data-action="toggle-details"]`.
+- [x] Al hacer clic, toggle `.is-expanded` en el `<article>` (`.card` o `.promo-card`).
+- [x] Botón "Agregar" con `stopPropagation()` no activa el toggle.
 
-### Paso 3 — Ajustes CSS (`src/sass/components/_cards.scss` y `_catalog.scss`)
-- [ ] En `_cards.scss`, estilizar el nuevo bloque `.card__compact-header` con Flexbox para alinear título y precio/acciones.
-- [ ] En `_cards.scss`, ocultar `.card__compact-details` por defecto. Se recomienda usar el truco de CSS Grid (`display: grid; grid-template-rows: 0fr; transition: grid-template-rows 0.3s ease;`) en el contenedor, con un sub-contenedor con `overflow: hidden`.
-- [ ] Al tener el `<article>` la clase `.is-expanded`, cambiar `.card__compact-details` a `grid-template-rows: 1fr;`.
-- [ ] En `_catalog.scss`, asegurar que la cuadrícula del catálogo (`.catalog__grid` y `.catalog__promos`) se comporte como lista en móvil (`grid-template-columns: 1fr`) y grilla adaptativa en desktop (ej. `grid-template-columns: repeat(auto-fit, minmax(300px, 1fr))`).
+### Paso 3 — Estilos CSS en `src/sass/components/_cards.scss`
+- [x] `.card__compact-header`: flexbox row, cursor pointer en móvil.
+- [x] `.card__compact-details`: CSS Grid `0fr → 1fr` con sub-contenedor `overflow: hidden`.
+- [x] `.card.is-expanded .card__compact-details`: `grid-template-rows: 1fr`.
+- [x] Indicador `▼` con rotate 180° al expandir. Oculto en desktop.
+- [x] En desktop: `.card__compact-details` siempre `grid-template-rows: 1fr`.
 
-### Paso 4 — Validación y Pruebas
-- [ ] Ejecutar `npm run build` y asegurar compilación limpia.
-- [ ] Ejecutar `./init.sh` para verificar integridad.
-- [ ] Comprobar apertura y cierre del acordeón en ambas vistas.
-- [ ] Asegurar que el botón "Agregar" funciona sin problemas al estar colapsado o expandido.
+### Paso 4 — Estilos CSS en `src/sass/pages/_catalog.scss` para promos
+- [x] `.promo-card__compact-header`: flexbox con imagen 100px (móvil) / 200px (desktop).
+- [x] `.promo-card__compact-details`: CSS Grid `0fr → 1fr` colapsable.
+- [x] `.promo-card.is-expanded .promo-card__compact-details`: expandido. En desktop siempre visible.
+- [x] Layout promo-card cambiado a `flex-direction: column` para acomodar el colapso.
+
+### Paso 5 — Validación
+- [x] `npm run build` → sin errores (569ms)
+- [ ] Revisión visual móvil: cards colapsadas con nombre+precio+Agregar, al tocar se expanden
+- [ ] Revisión visual desktop: todo visible, sin cambios respecto a hoy
+- [ ] Botón "Agregar" funciona tanto colapsado como expandido
+- [x] `./init.sh` → 57/57 checks pasados
 

@@ -12,7 +12,7 @@
   border-radius: var(--radius-lg);
   overflow: hidden;
   border: 1px solid rgba(255, 255, 255, 0.08);
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
   height: 100%;
 
   // Efecto hover (elevación y brillo en borde)
@@ -20,6 +20,94 @@
     transform: translateY(-8px);
     box-shadow: 0 12px 32px rgba(0, 0, 0, 0.3);
     border-color: rgba(230, 0, 18, 0.3);
+  }
+
+  // ==========================================
+  // Cabecera compacta (visible siempre en móvil)
+  // ==========================================
+  &__compact-header {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+    padding: var(--spacing-md);
+    cursor: pointer;
+
+    @media (min-width: 768px) {
+      cursor: default;
+    }
+  }
+
+  &__compact-header-info {
+    flex: 1;
+    min-width: 0;
+  }
+
+  &__compact-header-meta {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-xs);
+    flex-wrap: wrap;
+    margin-top: var(--spacing-xs);
+  }
+
+  &__title {
+    font-size: 1.25rem;
+    color: var(--text-color);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  // Precio con estilo chip amarillo (inline en cabecera)
+  &__price {
+    font-family: var(--font-display);
+    font-size: 1.4rem;
+    letter-spacing: 1px;
+    background-color: var(--color-secondary);
+    color: var(--color-black);
+    padding: 4px 14px;
+    border-radius: var(--radius-pill);
+    line-height: 1;
+  }
+
+  // ==========================================
+  // Indicador de toggle (▼)
+  // ==========================================
+  &__toggle-icon {
+    font-size: 0.75rem;
+    color: var(--color-text-muted);
+    transition: transform 0.3s ease;
+    flex-shrink: 0;
+
+    @media (min-width: 768px) {
+      display: none;
+    }
+  }
+
+  .card.is-expanded &__toggle-icon {
+    transform: rotate(180deg);
+  }
+
+  // ==========================================
+  // Detalles colapsables (imagen + descripción)
+  // ==========================================
+  &__compact-details {
+    display: grid;
+    grid-template-rows: 0fr;
+    transition: grid-template-rows 0.32s ease-out;
+
+    @media (min-width: 768px) {
+      grid-template-rows: 1fr;
+    }
+  }
+
+  .card.is-expanded &__compact-details {
+    grid-template-rows: 1fr;
+  }
+
+  &__compact-details-inner {
+    overflow: hidden;
+    min-height: 0;
   }
 
   // Contenedor de la imagen (más grande, aspect-ratio 3/2)
@@ -31,6 +119,19 @@
     align-items: center;
     justify-content: center;
     position: relative;
+  }
+
+  // Imagen real del producto
+  &__image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.5s ease;
+  }
+
+  // Zoom en la imagen al hacer hover
+  &:hover &__image {
+    transform: scale(1.1);
   }
 
   &__badge {
@@ -72,68 +173,12 @@
   &__variant-hint {
     font-size: 0.8rem;
     color: var(--color-secondary);
-    margin-bottom: var(--spacing-md);
-  }
-
-  // Imagen real del producto
-  &__image {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    transition: transform 0.5s ease;
-  }
-
-  // Zoom en la imagen al hacer hover
-  &:hover &__image {
-    transform: scale(1.1);
-  }
-
-  // Contenido de texto y acciones
-  &__content {
-    padding: var(--spacing-lg);
-    display: flex;
-    flex-direction: column;
-    flex-grow: 1;
-  }
-
-  &__title {
-    font-size: 1.25rem;
-    margin-bottom: var(--spacing-xs);
-    color: var(--text-color);
+    margin: var(--spacing-sm) var(--spacing-md) var(--spacing-md);
   }
 
   &__desc {
     font-size: 0.9rem;
     color: var(--text-color-muted);
-    margin-bottom: var(--spacing-lg);
-    flex-grow: 1;
-  }
-
-  // Zona inferior: Precio como chip y Botón
-  &__footer {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    flex-wrap: wrap;
-    gap: var(--spacing-sm);
-    border-top: 1px solid rgba(255, 255, 255, 0.06);
-    padding-top: var(--spacing-md);
-
-    .btn {
-      flex-grow: 1;
-      text-align: center;
-    }
-  }
-
-  // Precio con estilo chip amarillo (estilo carta Massaro)
-  &__price {
-    font-family: var(--font-display);
-    font-size: 1.4rem;
-    letter-spacing: 1px;
-    background-color: var(--color-secondary);
-    color: var(--color-black);
-    padding: 4px 14px;
-    border-radius: var(--radius-pill);
-    line-height: 1;
+    margin: var(--spacing-sm) var(--spacing-md) var(--spacing-md);
   }
 }

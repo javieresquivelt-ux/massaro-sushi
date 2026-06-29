@@ -40,18 +40,25 @@ export function renderCatalog(expandPromos = true) {
 
         return `
           <article class="card" data-category="${product.category}" data-product-id="${product.id}">
-            <div class="card__image-wrapper">
-              <img src="${product.image}" alt="${product.name}" class="card__image" loading="lazy" />
-              ${badgeHtml}
-              ${piecesHtml}
+            <div class="card__compact-header" data-action="toggle-details">
+              <div class="card__compact-header-info">
+                <h3 class="card__title">${product.name}</h3>
+                <div class="card__compact-header-meta">
+                  ${badgeHtml}
+                  ${piecesHtml}
+                  <span class="card__price">${formatPrice(product.price)}</span>
+                </div>
+              </div>
+              <button class="btn btn--primary">Agregar</button>
+              <span class="card__toggle-icon">▼</span>
             </div>
-            <div class="card__content">
-              <h3 class="card__title">${product.name}</h3>
-              <p class="card__desc">${product.description}</p>
-              ${variantText}
-              <div class="card__footer">
-                <span class="card__price">${formatPrice(product.price)}</span>
-                <button class="btn btn--primary">Agregar</button>
+            <div class="card__compact-details">
+              <div class="card__compact-details-inner">
+                <div class="card__image-wrapper">
+                  <img src="${product.image}" alt="${product.name}" class="card__image" loading="lazy" />
+                </div>
+                <p class="card__desc">${product.description}</p>
+                ${variantText}
               </div>
             </div>
           </article>
@@ -64,16 +71,23 @@ export function renderCatalog(expandPromos = true) {
       html += '<div class="catalog__promos">';
       html += promos.map(promo => `
         <article class="promo-card" data-product-id="${promo.id}">
-          <div class="promo-card__image-wrapper">
-            <img src="${promo.image}" alt="${promo.name}" class="promo-card__image" loading="lazy" />
-            <span class="promo-card__pieces">${promo.pieces} pz.</span>
+          <div class="promo-card__compact-header" data-action="toggle-details">
+            <div class="promo-card__image-wrapper">
+              <img src="${promo.image}" alt="${promo.name}" class="promo-card__image" loading="lazy" />
+              <span class="promo-card__pieces">${promo.pieces} pz.</span>
+            </div>
+            <div class="promo-card__compact-header-info">
+              <h3 class="promo-card__name">${promo.name}</h3>
+              <div class="promo-card__compact-header-meta">
+                <span class="promo-card__price">${formatPrice(promo.price)}</span>
+                <button class="btn btn--primary">Agregar</button>
+              </div>
+            </div>
+            <span class="card__toggle-icon">▼</span>
           </div>
-          <div class="promo-card__content">
-            <h3 class="promo-card__name">${promo.name}</h3>
-            <p class="promo-card__desc">${promo.description}</p>
-            <div class="promo-card__footer">
-              <span class="promo-card__price">${formatPrice(promo.price)}</span>
-              <button class="btn btn--primary">Agregar</button>
+          <div class="promo-card__compact-details">
+            <div class="promo-card__compact-details-inner">
+              <p class="promo-card__desc">${promo.description}</p>
             </div>
           </div>
         </article>
@@ -158,10 +172,21 @@ export function initCatalogSidebar(activeCategory = 'promos') {
     }
   });
 
+  // Toggle details (acordeón individual por card/promo)
+  catalogContent.addEventListener('click', (e) => {
+    const target = e.target.closest('[data-action="toggle-details"]');
+    if (!target) return;
+    const card = target.closest('.card, .promo-card');
+    if (!card) return;
+    card.classList.toggle('is-expanded');
+  });
+
   // Event delegation para botones "Agregar"
   catalogContent.addEventListener('click', (e) => {
     const btn = e.target.closest('.btn--primary');
     if (!btn) return;
+
+    e.stopPropagation();
 
     const card = btn.closest('[data-product-id]');
     if (!card) return;

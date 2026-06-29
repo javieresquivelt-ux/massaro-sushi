@@ -917,18 +917,65 @@ Se actualizaron los datos de contacto y dirección del negocio en ambas seccione
 
 **Validación**: `npm run build` exitoso (571ms) y `./init.sh` con 57/57 checks.
 
-### Refactorización a Vistas Compactas (2026-06-28)
+### Razonamiento Técnico — Fase 2.12: Vistas de Catálogo Compactas (2026-06-28)
 
-**Problema de Negocio**: La visualización actual del catálogo forzaba imágenes grandes y descripciones largas por defecto para todas las tarjetas. Esto generaba mucho scroll (fatiga visual) y obligaba a descargar todas las imágenes, lo que ralentizaba la toma de decisión para clientes recurrentes que ya saben qué pedir.
+**Problema**: El catálogo actual muestra imágenes grandes y descripciones largas por defecto para todas las cards y promos. En móvil esto genera mucho scroll vertical, fatiga visual, y ralentiza la toma de decisión para clientes recurrentes que ya conocen los productos.
 
-**Decisión basada en Mercado (Benchmark)**: Las grandes apps de Delivery (UberEats, PedidosYa) resuelven este problema minimizando el tamaño vertical de los ítems para mostrar mayor densidad de productos en pantalla. 
-- En Móvil: Usan listas de 1 columna altamente compactas.
-- En Desktop: Mantienen un formato compacto, pero lo organizan en Grillas (2 a 3 columnas) para no desperdiciar el enorme espacio horizontal y evitar columnas extremadamente anchas y vacías.
+**Benchmark de mercado**: UberEats, PedidosYa y Rappi en móvil usan listas compactas donde solo se ve nombre, precio y un CTA. La imagen y descripción se revelan al expandir o al entrar al detalle del producto. Esto permite mayor densidad de información en pantalla.
 
-**Arquitectura Aprobada (Enfoque Híbrido)**:
-Se decidió aplicar una refactorización estructural donde **todo el catálogo (incluyendo Promos)** usará un modelo de **Acordeón Individual**.
-1. **Oculto por defecto**: Solo se muestran título, precio, piezas, botón de agregar y un control "▼".
-2. **Despliegue a demanda**: Al clicar, se expande la imagen (con carga diferida / lazy load) y la descripción.
-3. **Responsive Inteligente**: Usaremos exactamente el mismo HTML para móvil y desktop. El CSS se encargará de presentarlos apilados en móvil (lista 1 columna) y en formato grilla adaptativa en pantallas anchas (Desktop), logrando lo mejor de ambos mundos sin código duplicado.
+**Decisión de diseño**:
+- **Móvil** (`max-width: 767px`): Cards y promos colapsadas por defecto. Cabecera visible con nombre, badges, precio, botón "Agregar" + indicador `▼`. Al tocar la cabecera se expande para mostrar imagen-wrapper, descripción y hint de variantes.
+- **Desktop** (`min-width: 768px`): Sin cambios. Todo visible siempre, igual que hoy. El indicador `▼` se oculta y el contenedor de detalles siempre está expandido.
 
-*Nota operativa: El código de implementación será desarrollado por el agente de terminal OpenCode.*
+**Arquitectura**:
+- **Templates JS** (`catalog.js`): Se reestructuran los templates de `card` y `promo-card` para incluir un contenedor `.card__compact-details` (o `.promo-card__compact-details`) que envuelve imagen-wrapper y descripción. La cabecera `.card__compact-header` siempre visible.
+- **Toggle por JS**: Event delegation en `catalogContent` para capturar clics en `[data-action="toggle-details"]` o en la cabecera. Toggle de clase `.is-expanded` en el `<article>`. El botón "Agregar" usa `stopPropagation()` para no disparar el toggle accidentalmente.
+- **Animación CSS**: Mismo patrón que el acordeón de categorías — CSS Grid `0fr → 1fr` con sub-contenedor `overflow: hidden`. En desktop se fuerza `grid-template-rows: 1fr` siempre.
+- **Promos**: Misma lógica. `.promo-card__compact-details` colapsable en móvil. La card mantiene su layout horizontal (imagen a la izquierda, contenido a la derecha), pero la imagen se oculta hasta expandir.
+- **Grid**: En móvil se mantiene `grid-template-columns: 1fr` (lista). Desktop sin cambios (grilla adaptativa 2-4 columnas).
+
+**Riesgos y mitigaciones**:
+| Riesgo | Mitigación |
+|---|---|
+| Botón "Agregar" no funciona por event propagation | `e.stopPropagation()` en el listener del botón |
+| Animaciones conflictivas con el acordeón de categorías | El toggle por card usa una clase diferente (`.is-expanded` en el `<article>`) y es independiente del acordeón de categorías |
+| Promos se ven raras al colapsar imagen en móvil | El diseño horizontal se mantiene, solo se oculta la imagen-wrapper. Al expandir, la imagen reaparece con transición suave |
+| Desktop se ve afectado accidentalmente | Media query `min-width: 768px` fuerza siempre expandido y oculta el indicador |
+
+**Archivos a modificar**:
+- `src/js/catalog.js` — Templates de card y promo-card con estructura compacta, event delegation para toggle, stopPropagation en botón Agregar
+- `src/sass/components/_cards.scss` — `.card__compact-header`, `.card__compact-details` con animación CSS Grid, reglas desktop
+- `src/sass/pages/_catalog.scss` — `.promo-card__compact-details`, reglas desktop
+
+**Validación**:
+- `npm run build` → sin errores
+- Revisión visual móvil: cards colapsadas, al tocar se expanden, botón "Agregar" funciona
+- Revisión visual desktop: sin cambios respecto a hoy
+- `./init.sh` → 57/57 checks
+
+### Ejecución Fase 2.12 — Vistas de Catálogo Compactas (2026-06-28)
+
+**Implementado**:
+
+1. **Templates JS** (`catalog.js`): Reestructurados los templates de `card` y `promo-card`:
+   - Cabecera `.card__compact-header` / `.promo-card__compact-header` con `data-action="toggle-details"` visible siempre en móvil, contiene: título, badges, precio, botón "Agregar" + indicador `▼`.
+   - Detalles `.card__compact-details` / `.promo-card__compact-details` envuelven imagen-wrapper y descripción. Colapsables por defecto en móvil.
+   - `e.stopPropagation()` en el listener del botón "Agregar" para no disparar el toggle.
+
+2. **Lógica JS** (`catalog.js`): Nuevo event delegation para `[data-action="toggle-details"]` que togglea `.is-expanded` en el `<article>`. Independiente del acordeón de categorías.
+
+3. **Estilos CSS Cards** (`_cards.scss`):
+   - `.card__compact-header`: flexbox row con gap, cursor pointer en móvil.
+   - `.card__toggle-icon`: indicador `▼` con rotate 180° al expandir. Oculto en desktop.
+   - `.card__compact-details`: CSS Grid `0fr → 1fr` con sub-contenedor `overflow: hidden; min-height: 0`.
+   - En desktop (`min-width: 768px`): `grid-template-rows: 1fr` siempre, toggle-icon oculto, cursor default.
+   - `.card__price`: ahora como chip inline en la cabecera (sigue siendo el mismo estilo visual).
+   - Eliminados estilos legacy: `__content`, `__footer` (ya no existen en el nuevo template).
+
+4. **Estilos CSS Promos** (`_catalog.scss`):
+   - `.promo-card`: cambiado de `flex-direction: row` a `column` para acomodar el colapso.
+   - `.promo-card__compact-header`: flexbox con imagen 100px (móvil) / 200px (desktop), info, botón y toggle.
+   - `.promo-card__compact-details`: mismo patrón CSS Grid colapsable.
+   - Eliminados estilos legacy: `__content`, `__footer`.
+
+**Validación**: `npm run build` (569ms) ✅ — `./init.sh` (57/57) ✅
