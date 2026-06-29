@@ -173,13 +173,12 @@ export function initCatalogSidebar(activeCategory = 'promos') {
   });
 
   // Toggle details (acordeón individual por card/promo)
-  catalogContent.addEventListener('click', (e) => {
-    const target = e.target.closest('[data-action="toggle-details"]');
-    if (!target) return;
-    const card = target.closest('.card, .promo-card');
+  catalogContent.addEventListener('click', function(e) {
+    const card = e.target.closest('.promo-card, .card');
     if (!card) return;
+    if (e.target.closest('.btn--primary')) return;
+    if (e.target.closest('.catalog__accordion-header')) return;
     card.classList.toggle('is-expanded');
-    e.stopPropagation();
   });
 
   // Event delegation para botones "Agregar"
