@@ -735,6 +735,79 @@ Tras evaluar la navegación inicial de la tienda móvil, se concluyó que mostra
 
 ---
 
+## 🐛 Bugfix: Botón "Continuar pedido" entrecortado en Samsung A52 (2026-06-28)
+
+### Reporte
+En un Samsung A52 con Chrome, al agregar **Promo 1** al carrito y abrir el drawer, el botón "Continuar pedido" en el footer del carrito se ve entrecortado/clippeado. En otros viewports (iPhone XR, iPhone SE, inspector Chrome) no se reproduce. Inicialmente se pensó que era específico de Promo 1, pero el análisis reveló que es un bug de layout que se manifiesta con **1 solo item** en el carrito en viewports Android donde `100vh` > viewport real.
+
+### Causa raíz (múltiple)
+
+**Causa 1 — `height: 100vh` en el drawer** (`src/sass/components/_cart-drawer.scss:26`):
+En Chrome para Android, `100vh` NO descuenta la barra de direcciones ni la barra de navegación inferior (~56-80px + ~48px). El drawer se renderiza más alto que el viewport real, y el footer queda clippeado en la parte inferior. La solución moderna es `100dvh` (dynamic viewport height, Chrome 108+).
+
+**Causa 2 — Footer, salsas y personalización están FUERA del scroll container** (`index.html:285-311`):
+La estructura HTML del drawer es:
+```
+cart-drawer (flex column, height: 100vh)
+├── __header (fijo)
+├── __body (flex: 1, overflow-y: auto) ← solo esto scrollea
+├── #cart-salsas ← FUERA del body
+├── #cart-customization ← FUERA del body
+└── __footer ← FUERA del body
+```
+Cuando solo hay 1 item en el carrito, `__body` con `flex: 1` se estira ocupando todo el espacio disponible. Las secciones `#cart-salsas`, `#cart-customization` y `__footer` se empujan debajo del viewport. Como no hay scroll en esas secciones, el botón queda invisible/clippeado. Con múltiples items el body se llena más y el footer alcanza a verse.
+
+**Causa 3 — Sin `env(safe-area-inset-bottom)`**: No hay padding para la zona de navegación gestual de Android.
+
+**Causa 4 — `document.body.style.overflow = 'hidden'`** (`cart-ui.js:81`): Bloquea el scroll del body, pero el drawer no maneja correctamente el overflow del footer.
+
+### Por qué solo con Promo 1
+No es un bug de Promo 1 per se. Es que al tener **1 solo item** (Promo 1 recién agregada, sin salsas ni personalización aún), el `__body` tiene poca altura real y `flex: 1` lo estira al máximo, empujando el footer fuera de los límites del `100vh`. Con Promo 1 + salsas + personalización, o con otras promos que tienen descripciones más largas en el drawer (no, la descripción no aparece en el drawer, solo el nombre), el comportamiento sería el mismo si también se tiene 1 solo item.
+
+### Solución planificada
+
+**Paso 1 — Cambiar `100vh` a `100dvh`** en `_cart-drawer.scss:26`:
+```diff
+-  height: 100vh;
++  height: 100dvh;
+```
+`100dvh` descuenta dinámicamente las barras del navegador.
+
+**Paso 2 — Reestructurar el drawer para que footer sea scrolleable**:
+Mover `#cart-salsas`, `#cart-customization` y `__footer` DENTRO del `cart-drawer__body`. Todo el drawer scrollea como una unidad:
+```
+cart-drawer (flex column, 100dvh)
+├── __header (flex-shrink: 0, fijo)
+└── __body (flex: 1, overflow-y: auto)
+    ├── cart items
+    ├── #cart-salsas
+    ├── #cart-customization
+    └── __footer
+```
+
+**Paso 3 — Añadir `env(safe-area-inset-bottom)`** al footer para la zona de navegación gestual de Android:
+```scss
+padding-bottom: max(1.5rem, env(safe-area-inset-bottom, 1.5rem));
+```
+
+**Paso 4 — Ajustar estilos de `.cart-drawer__extras`** para que funcionen dentro del body como flujo normal.
+
+**Archivos a modificar**:
+- `index.html` — Mover salsas, customization y footer dentro de `#cart-drawer-body`
+- `src/sass/components/_cart-drawer.scss` — Cambiar `100vh` → `100dvh`, añadir safe-area, ajustar estilos de extras para flujo inline
+
+### Resultado final — Decisión: Opción B (Estructura original + 100dvh)
+
+Al implementar el Paso 2 (mover footer/salsas dentro del body), se detectó un bug colateral: `renderCartItems()` en `cart-ui.js` hace `body.innerHTML = ...`, lo que pisotea los elementos HTML estáticos (#cart-salsas, #cart-customization, #cart-drawer-footer) ahora que están dentro del body. Aunque `renderSalsas()` y `renderCustomizationBadge()` se llaman después, cuando el drawer está cerrado y se agrega el primer item, `isOpen = false` y esas funciones no se ejecutan, dejando salsas y footer invisibles.
+
+**Solución final (Opción B)**: Revertir la estructura HTML a su estado original (salsas, customization y footer fuera del body), manteniendo solo `100dvh` y `safe-area-inset-bottom`. Esto corrige el clipping (causa raíz del bug en Samsung A52) sin introducir nuevos bugs por el pisoteo del `innerHTML`.
+
+**Cambios definitivos que quedan en el código**:
+1. `src/sass/components/_cart-drawer.scss` — `height: 100vh` → `height: 100dvh` (`.cart-drawer`)
+2. `src/sass/components/_cart-drawer.scss` — Footer padding con `safe-area-inset-bottom`
+3. `index.html` — Sin cambios respecto a la estructura original
+
+---
 ## Razonamiento Técnico — Pulido Premium UX/UI (Fase 2.6)
 
 ### Contexto y Requerimiento

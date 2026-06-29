@@ -1036,6 +1036,37 @@ checkout.js → setDeliveryMode('pickup')
 
 ---
 
+## 🐛 Bugfix 2.11.5: Botón "Continuar pedido" entrecortado en Samsung A52 (Drawer Layout)
+
+> **Problema**: En Samsung A52 con Chrome, al agregar Promo 1 al carrito y abrir el drawer, el botón "Continuar pedido" aparece clippeado/entrecortado. Causa raíz: `100vh` no descuenta barras del navegador en Android + footer/salsas/personalización fuera del scroll container.
+>
+> **Diagnóstico completo**: Documentado en `memory.md` → "Bugfix: Botón Continuar pedido entrecortado en Samsung A52".
+>
+> **Orden de ejecución**: Este bugfix se ejecutará **antes** que la Fase 2.12.
+
+### Diagnóstico inicial
+Se intentó la Opción A (mover footer/salsas dentro del body) pero `renderCartItems()` en `cart-ui.js` hace `body.innerHTML = ...` que pisotea los elementos HTML estáticos. Al agregar el primer item con el drawer cerrado (`isOpen = false`), `renderSalsas()` y `renderCustomizationBadge()` no se ejecutan, dejando salsas y footer invisibles.
+
+### Decisión final — Opción B
+Revertir estructura HTML a su estado original y mantener solo `100dvh` + `safe-area-inset-bottom`. Esto corrige el clipping real (causa raíz del bug en Samsung A52) sin introducir nuevos bugs.
+
+### Paso 1 — Cambiar height del drawer a 100dvh
+- [x] `src/sass/components/_cart-drawer.scss` — Cambiar `height: 100vh` → `height: 100dvh` en `.cart-drawer`.
+
+### Paso 2 — Revertir estructura HTML a estado original
+- [x] `index.html` — Revertir: `#cart-salsas`, `#cart-customization` y `#cart-drawer-footer` vuelven a estar **fuera** de `#cart-drawer-body`, manteniendo la estructura original.
+
+### Paso 3 — Añadir safe-area-inset-bottom al footer
+- [x] `src/sass/components/_cart-drawer.scss` — Añadir `padding-bottom: max(1.5rem, env(safe-area-inset-bottom, 1.5rem))` al `.cart-drawer__footer`.
+
+### Paso 4 — Validación
+- [x] `npm run build` → sin errores (565ms)
+- [ ] Verificar en Samsung A52 que el botón "Continuar pedido" se ve completo y no clippeado
+- [ ] Verificar que salsas, personalización y botón "Continuar pedido" funcionan correctamente
+- [x] `./init.sh` → 57/57 checks pasados
+
+---
+
 ## 🚀 Fase 2.12: Refactor UX/UI - Vistas de Catálogo Compactas (Híbrido)
 
 > **Objetivo**: Optimizar la velocidad de escaneo y carga del catálogo. Ocultar imágenes y descripciones por defecto, mostrando solo un resumen (Título, Piezas, Precio, Agregar) y un botón de acordeón.
