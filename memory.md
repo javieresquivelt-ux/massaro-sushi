@@ -1218,3 +1218,75 @@ Con esto, en desktop la promo tendrá:
    - Se eliminó el selector legacy `promo-card__image-wrapper` que estaba fuera de `__compact-details-inner` (ya no se usaba y podía causar confusión).
 
 **Validación**: `npm run build` (567ms) ✅ — `./init.sh` (57/57) ✅
+
+### Diagnóstico posterior — problema secundario detectado
+
+La solución del Bugfix 2.12.4 (poner `promo-card` en `flex-direction: row` en desktop) resolvió el tamaño de la imagen pero introdujo un nuevo problema: el header (nombre + precio + botón) y los detalles (imagen + descripción) quedaron en la misma fila horizontal, deformando el texto. Ver Bugfix 2.12.5.
+
+---
+
+## 🐛 Bugfix 2.12.5: Layout de promos en desktop — header arriba, imagen+descripción abajo en fila (2026-06-28)
+
+### Reporte
+En desktop, las promos muestran el header (nombre + precio + botón) y los detalles (imagen + descripción) en la misma fila horizontal. Esto hace que el texto se vea deformado y desordenado, arruinando la UX/UI.
+
+### Causa raíz
+
+El Bugfix 2.12.4 puso `promo-card` en `flex-direction: row` en desktop. Esto era incorrecto porque:
+- `promo-card ` tiene dos hijos directos: `__compact-header` y `__compact-details`
+- Con `flex-direction: row`, ambos hijos se alinean en la misma fila horizontal
+- El header (nombre + precio + botón) y los detalles (imagen + descripción) compiten por el espacio horizontal
+- El resultado es que el texto del nombre se deforma al no tener suficiente ancho
+
+Lo correcto es:
+- `promo-card`: `flex-direction: column` (header arriba, detalles abajo)
+- `__compact-details-inner`: `flex-direction: row` (imagen 200px a la izquierda, descripción a la derecha)
+
+### Solución planificada
+
+**Paso 1 — `promo-card` vuelve a `column` en desktop**:
+Eliminar `flex-direction: row` del media query `min-width: 768px`. El valor por defecto `column` hace que header y detalles se apilen verticalmente.
+
+**Paso 2 — `__compact-header` pierde `flex: 1` en desktop**:
+El header debe ocupar su ancho natural (100%), no estirarse. El `flex: 1` se añadió en 2.12.4 como parte del layout horizontal pero ya no es necesario.
+
+**Layout final en desktop:**
+```
+promo-card (flex-direction: column)
+├── __compact-header (100% ancho)
+│   ├── nombre + precio
+│   └── botón Agregar + ▼ (oculto)
+└── __compact-details (flex-direction: row en desktop)
+    └── __compact-details-inner (flex-direction: row)
+        ├── __image-wrapper (200px)
+        └── __desc (flex: 1)
+```
+
+### Archivos a modificar
+- `src/sass/pages/_catalog.scss` — 2 cambios: eliminar `flex-direction: row` de `promo-card` en desktop, eliminar `flex: 1` de `__compact-header` en desktop
+
+### Validación
+- Desktop: header arriba, imagen 200px a la izquierda, descripción a la derecha
+- Móvil: sin cambios, promos colapsadas con toggle
+
+### Ejecución Bugfix 2.12.5 (2026-06-28)
+
+**Implementado**:
+
+1. **CSS Promos** (`_catalog.scss`): Se eliminó `flex-direction: row` del media query `min-width: 768px` en `.promo-card`. Ahora `promo-card` usa `flex-direction: column` (valor por defecto), lo que apila el header arriba y los detalles abajo.
+
+2. Se eliminó `flex: 1` de `__compact-header` en desktop. El header ahora ocupa su ancho natural (100%).
+
+**Layout resultante en desktop:**
+```
+promo-card (flex-direction: column)
+├── __compact-header (100% ancho)
+│   ├── nombre + precio
+│   └── botón Agregar + ▼ (oculto en desktop)
+└── __compact-details (flex-direction: row)
+    └── __compact-details-inner (flex-direction: row)
+        ├── __image-wrapper (200px)
+        └── __desc (flex: 1)
+```
+
+**Validación**: `npm run build` (584ms) ✅ — `./init.sh` (57/57) ✅

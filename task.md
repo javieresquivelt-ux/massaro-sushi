@@ -1238,7 +1238,39 @@ Además, el layout de `promo-card` cambió de `flex-direction: row` a `column`, 
 
 ### Paso 2 — Validación
 - [x] `npm run build` → sin errores (567ms)
-- [ ] Desktop: promos con imagen de 200px a la izquierda, descripción a la derecha
+- [ ] Desktop: promos con imagen de 200px a la izquierda, descripción a la derecha **(se detectó bug: header e imagen en la misma fila, texto deformado)**
 - [ ] Móvil: promos colapsadas, al expandir se ve imagen + descripción
+- [x] `./init.sh` → 57/57 checks pasados
+
+---
+
+## 🐛 Bugfix 2.12.5: Layout de promos en desktop — header arriba, imagen+descripción abajo en fila
+
+> **Problema reportado**: En desktop, las promos muestran el header (nombre + precio + botón) y los detalles (imagen + descripción) en la misma fila horizontal, porque `promo-card` tiene `flex-direction: row`. Esto hace que el texto se vea deformado y desordenado.
+>
+> **Diagnóstico completo**: Documentado en `memory.md` → "Bugfix 2.12.5".
+
+### Causa raíz
+
+El Bugfix 2.12.4 cambió `promo-card` a `flex-direction: row` en desktop para que la imagen de 200px y la descripción estuvieran en fila. Pero este cambio hizo que **header y detalles** también quedaran en fila, porque son hijos directos de `promo-card`:
+```
+promo-card (flex-direction: row) ← ambos hijos en fila
+├── __compact-header (flex: 1) ← nombre + precio + botón
+└── __compact-details (flex row) ← imagen + descripción
+```
+Header y detalles deben estar en columna. Solo dentro de detalles, imagen y descripción deben estar en fila.
+
+### Solución
+
+### Paso 1 — Cambiar `promo-card` a `flex-direction: column` en desktop
+- [x] `src/sass/pages/_catalog.scss` — Eliminado `flex-direction: row` del media query. `promo-card` queda en `column` (valor por defecto).
+
+### Paso 2 — Ajustar `__compact-header` en desktop
+- [x] `src/sass/pages/_catalog.scss` — Eliminado `flex: 1` de `__compact-header` en desktop. El header ocupa su ancho natural.
+
+### Paso 3 — Validación
+- [x] `npm run build` → sin errores (584ms)
+- [ ] Desktop: header arriba, imagen 200px a la izquierda + descripción a la derecha
+- [ ] Móvil: promos colapsadas, al expandir imagen + descripción
 - [x] `./init.sh` → 57/57 checks pasados
 
