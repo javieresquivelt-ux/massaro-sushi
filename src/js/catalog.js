@@ -179,6 +179,7 @@ export function initCatalogSidebar(activeCategory = 'promos') {
     const card = target.closest('.card, .promo-card');
     if (!card) return;
     card.classList.toggle('is-expanded');
+    e.stopPropagation();
   });
 
   // Event delegation para botones "Agregar"
