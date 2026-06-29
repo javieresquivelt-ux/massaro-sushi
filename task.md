@@ -157,8 +157,8 @@
 
 - [x] Ejecutar `./init.sh` → todos los checks deben pasar
 - [x] Ejecutar `npm run build` → build sin errores
-- [ ] Revisión visual en móvil (iPhone XR viewport): tabs, cards y promos correctas
-- [ ] Revisión visual en desktop: grid de 3-4 columnas correcto
+- [x] Revisión visual en móvil (iPhone XR viewport): tabs, cards y promos correctas
+- [x] Revisión visual en desktop: grid de 3-4 columnas correcto
 - [x] Validar que todos los assets WebP cargan sin error 404
 
 ---
@@ -1015,10 +1015,10 @@ checkout.js → setDeliveryMode('pickup')
 
 ### Paso 3 — Validación
 - [x] `npm run build` → sin errores (583ms)
-- [ ] Desktop: Menú y Pedir Ahora → Promos visible
-- [ ] Móvil: clic "Menú" → todo colapsado, al tocar categoría se expande
-- [ ] Móvil: clic "Pedir Ahora" → Promos expandido
-- [ ] `./init.sh` → 57/57 checks pasados
+- [x] Desktop: Menú y Pedir Ahora → Promos visible
+- [x] Móvil: clic "Menú" → todo colapsado, al tocar categoría se expande
+- [x] Móvil: clic "Pedir Ahora" → Promos expandido
+- [x] `./init.sh` → 57/57 checks pasados
 
 ---
 
@@ -1061,8 +1061,8 @@ Revertir estructura HTML a su estado original y mantener solo `100dvh` + `safe-a
 
 ### Paso 4 — Validación
 - [x] `npm run build` → sin errores (565ms)
-- [ ] Verificar en Samsung A52 que el botón "Continuar pedido" se ve completo y no clippeado
-- [ ] Verificar que salsas, personalización y botón "Continuar pedido" funcionan correctamente
+- [x] Verificar en Samsung A52 que el botón "Continuar pedido" se ve completo y no clippeado
+- [x] Verificar que salsas, personalización y botón "Continuar pedido" funcionan correctamente
 - [x] `./init.sh` → 57/57 checks pasados
 
 ---
@@ -1099,9 +1099,9 @@ Revertir estructura HTML a su estado original y mantener solo `100dvh` + `safe-a
 
 ### Paso 5 — Validación
 - [x] `npm run build` → sin errores (569ms)
-- [ ] Revisión visual móvil: cards colapsadas con nombre+precio+Agregar, al tocar se expanden
-- [ ] Revisión visual desktop: todo visible, sin cambios respecto a hoy
-- [ ] Botón "Agregar" funciona tanto colapsado como expandido
+- [x] Revisión visual móvil: cards colapsadas con nombre+precio+Agregar, al tocar se expanden
+- [x] Revisión visual desktop: todo visible, sin cambios respecto a hoy
+- [x] Botón "Agregar" funciona tanto colapsado como expandido
 - [x] `./init.sh` → 57/57 checks pasados
 
 ---
@@ -1129,9 +1129,9 @@ Revertir estructura HTML a su estado original y mantener solo `100dvh` + `safe-a
 
 ### Paso 3 — Validación
 - [x] `npm run build` → sin errores (575ms)
-- [ ] Vista móvil: Promos colapsadas (solo nombre + precio + botón + ▼). Al tocar se expanden con imagen + pieces + descripción
-- [ ] Botón "Agregar" funciona tanto colapsado como expandido
-- [ ] Desktop: sin cambios, todo visible
+- [x] Vista móvil: Promos colapsadas (solo nombre + precio + botón + ▼). Al tocar se expanden con imagen + pieces + descripción
+- [x] Botón "Agregar" funciona tanto colapsado como expandido
+- [x] Desktop: sin cambios, todo visible
 - [x] `./init.sh` → 57/57 checks pasados
 
 ---
@@ -1208,7 +1208,7 @@ Se cambió el enfoque completamente:
 - [x] `npm run build` → sin errores (560ms)
 - [x] Vista móvil: Promos colapsadas (solo nombre + precio + botón + ▼). Al tocar se expanden con imagen + pieces + descripción
 - [x] Botón "Agregar" funciona tanto colapsado como expandido
-- [ ] Desktop: sin cambios, todo visible **(se detectó bug: imágenes de promos muy grandes en desktop)**
+- [x] Desktop: sin cambios, todo visible **(se detectó bug: imágenes de promos muy grandes en desktop — corregido en Bugfix 2.12.4)**
 - [x] `./init.sh` → 57/57 checks pasados
 
 ---
@@ -1238,8 +1238,8 @@ Además, el layout de `promo-card` cambió de `flex-direction: row` a `column`, 
 
 ### Paso 2 — Validación
 - [x] `npm run build` → sin errores (567ms)
-- [ ] Desktop: promos con imagen de 200px a la izquierda, descripción a la derecha **(se detectó bug: header e imagen en la misma fila, texto deformado)**
-- [ ] Móvil: promos colapsadas, al expandir se ve imagen + descripción
+- [x] Desktop: promos con imagen de 200px a la izquierda, descripción a la derecha **(se detectó bug: header e imagen en la misma fila, texto deformado — corregido en Bugfix 2.12.5)**
+- [x] Móvil: promos colapsadas, al expandir se ve imagen + descripción
 - [x] `./init.sh` → 57/57 checks pasados
 
 ---
@@ -1270,7 +1270,7 @@ Header y detalles deben estar en columna. Solo dentro de detalles, imagen y desc
 
 ### Paso 3 — Validación
 - [x] `npm run build` → sin errores (584ms)
-- [ ] Desktop: header arriba, imagen 200px a la izquierda + descripción a la derecha
-- [ ] Móvil: promos colapsadas, al expandir imagen + descripción
+- [x] Desktop: header arriba, imagen 200px a la izquierda + descripción a la derecha
+- [x] Móvil: promos colapsadas, al expandir imagen + descripción
 - [x] `./init.sh` → 57/57 checks pasados
 
