@@ -14,7 +14,8 @@ Proyecto práctico que aplica conceptos de:
 - **Arquitectura Sass 7–1** — Estilos modulares y escalables
 - **Vite** — Build tool moderno con HMR
 - **Imágenes responsivas** — Formato WebP, optimización con sharp-cli
-- **Mobile-first** — UX priorizando dispositivos móviles (navegación hamburguesa, acordeón vertical)
+- **Mobile-first** — UX priorizando dispositivos móviles (navegación hamburguesa, acordeón vertical, catálogo compacto colapsable)
+- **Catálogo compacto** — Cards y promos colapsadas en móvil, se expanden al hacer clic para mostrar imagen y descripción
 - **Carrito lateral** — Estado con localStorage, persistencia, badge en tiempo real
 - **Salsas y personalización** — Selector de salsas con cantidad, personalización texto libre
 - **Checkout WhatsApp** — Pedido preformateado con Delivery/Retiro y teléfono obligatorio
@@ -62,7 +63,7 @@ massaro-sushi/
 ## 🧭 Secciones del sitio
 
 - **Hero** — Portada con logo, título y CTA
-- **Catálogo** — Grid de productos con sidebar por categoría (desktop) y acordeón vertical (móvil)
+- **Catálogo** — Grid de productos con sidebar por categoría (desktop) y acordeón vertical (móvil). Cards y promos colapsables en móvil, se expanden al hacer clic
 - **Promos** — Lista ampliada con detalle de piezas y contenido
 - **Carrito lateral** — Drawer con items del pedido, selector de salsas y personalización
 - **Checkout** — Formulario con nombre, teléfono, Delivery/Retiro y envío a WhatsApp
