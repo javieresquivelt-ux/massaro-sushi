@@ -1169,9 +1169,45 @@ Esto sí funciona, pero sin el feedback visual del icono girando, el usuario no 
 
 ### Paso 2 — Validación
 - [x] `npm run build` → sin errores (626ms)
-- [ ] Vista móvil: al hacer clic en cabecera de Promo 1, el icono ▼ gira y se expanden imagen + descripción
-- [ ] Botón "Agregar" funciona correctamente
-- [ ] Desktop: sin cambios, todo visible
+- [x] Vista móvil: el icono ▼ gira pero no se expanden detalles (CSS Grid no funciona)
 - [x] `./init.sh` → 57/57 checks pasados
-- [ ] **Revisión general**: Verificar que las cards regulares (Rolls, Especiales, etc.) sigan funcionando correctamente
+
+---
+
+## 🐛 Bugfix 2.12.3: Toggle de promos no expande detalles (CSS Grid no confiable)
+
+> **Problema reportado**: Tras Bugfix 2.12.1 (imagen colapsada) y 2.12.2 (▼ gira), los detalles de las promos (imagen + descripción) aún no se expanden al hacer clic. El icono ▼ gira pero no hay contenido visible nuevo.
+>
+> **Diagnóstico completo**: Documentado en `memory.md` → "Bugfix 2.12.3".
+
+### Causa raíz
+
+**CSS Grid `0fr → 1fr` no fiable dentro de contenedores anidados**: El colapso de detalles usaba `display: grid; grid-template-rows: 0fr; transition: grid-template-rows 0.32s ease-out`. Cuando `is-expanded` se agregaba, cambiaba a `grid-template-rows: 1fr`. Sin embargo, este patrón CSS Grid no es 100% fiable cuando el contenedor está dentro de otro grid (`catalog__category-items` también usa `grid-template-rows: 0fr → 1fr` para el acordeón de categorías). La anidación de grids con `grid-template-rows` causa que el navegador no calcule correctamente la altura del contenedor interno.
+
+Además, el truco del sub-contenedor con `overflow: hidden; min-height: 0` no siempre funciona cuando hay múltiples niveles de anidación con `display: grid`.
+
+### Solución planificada (3 intentos)
+
+**Intento 1 — `data-action` con `closest`** (`catalog.js`): El listener buscaba `e.target.closest('[data-action="toggle-details"]')`. El atributo sí estaba en el HTML, pero el evento de clic no siempre llegaba correctamente porque el span ▼ no está dentro de un elemento con ese atributo de forma directa — el span está dentro del header que tiene el atributo. Teóricamente debería funcionar, pero en la práctica no.
+
+**Intento 2 — Selector por clase con `stopPropagation`** (`catalog.js`): Cambió a `.promo-card__compact-header, .card__compact-header` como selector, y añadió `e.stopPropagation()`. Seguía sin funcionar. El análisis del código compilado confirmó que el listener y los selectores eran correctos.
+
+**Intento 3 — Simplificar al máximo: `display: none/block` + JS directo (solución final)**:
+Se cambió el enfoque completamente:
+- JS: busca cualquier clic dentro de `.promo-card, .card`, excluye botones y acordeón de categorías, y togglea `is-expanded`. Además, **directamente setea `details.style.display = 'block'/'none'`** según el estado, sin depender de transiciones CSS.
+- CSS: `.card__compact-details` y `.promo-card__compact-details` usan `display: none` por defecto en móvil, `display: block` en desktop, y `display: block` cuando el padre tiene `is-expanded`.
+- Se eliminaron `display: grid`, `grid-template-rows`, `transition`, y `overflow: hidden` de los contenedores de detalles.
+
+### Archivos modificados
+
+- `src/js/catalog.js` — Listener simplificado: captura clics en `.promo-card, .card`, excluye botón y acordeón, togglea clase Y setea `display` directo
+- `src/sass/components/_cards.scss` — `.card__compact-details` cambió de `display: grid; grid-template-rows: 0fr` a `display: none`
+- `src/sass/pages/_catalog.scss` — `.promo-card__compact-details` mismo cambio. `__compact-details-inner` cambió `overflow: hidden` → `overflow: visible`
+
+### Validación
+- [x] `npm run build` → sin errores (560ms)
+- [x] Vista móvil: Promos colapsadas (solo nombre + precio + botón + ▼). Al tocar se expanden con imagen + pieces + descripción
+- [x] Botón "Agregar" funciona tanto colapsado como expandido
+- [x] Desktop: sin cambios, todo visible
+- [x] `./init.sh` → 57/57 checks pasados
 

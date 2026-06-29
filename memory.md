@@ -1081,3 +1081,69 @@ Además, el usuario percibe que "no funciona" porque el único feedback visual d
 1. **CSS Promos** (`_catalog.scss`): Añadida la regla `.promo-card.is-expanded .card__toggle-icon { transform: rotate(180deg); }` justo después de la regla de expansión de detalles existente.
 
 **Validación**: `npm run build` (626ms) ✅ — `./init.sh` (57/57) ✅
+
+---
+
+## 🐛 Bugfix 2.12.3: Toggle de promos no expande detalles — Solución final (2026-06-28)
+
+### Reporte
+Tras Bugfix 2.12.1 (imagen movida a detalles colapsables) y 2.12.2 (regla CSS para rotar ▼ en promos), el icono ▼ giraba correctamente al hacer clic pero los detalles (imagen + descripción) no se expandían. El usuario probó en Samsung A52 y el comportamiento persistía.
+
+### Iteraciones de diagnóstico
+
+**Iteración 1 — `data-action` con `closest`**: El listener buscaba `e.target.closest('[data-action="toggle-details"]')`. El `promo-card__compact-header` tenía `data-action="toggle-details"`, y `closest` desde cualquier hijo del header (nombre, precio, ▼) debería encontrarlo. Se verificó en el código compilado que el atributo y el listener existían. **No funcionó.**
+
+**Iteración 2 — Selector por clase + `stopPropagation`**: Se cambió a `.promo-card__compact-header, .card__compact-header` como selector. Además se añadió `e.stopPropagation()` para evitar interferencia del listener del acordeón de categorías. Se verificó en el built JS que el código era correcto. **No funcionó.**
+
+**Iteración 3 — Diagnóstico con `console.log`**: Se agregaron logs temporales para confirmar que el clic llegaba al `catalogContent`. El log confirmó que el evento SÍ llegaba. Se ejecutó `document.querySelector('.promo-card').classList.add('is-expanded')` manualmente en la consola y **tampoco expandía los detalles**, confirmando que el problema no era del JS sino del CSS.
+
+### Causa raíz real
+
+**CSS Grid `0fr → 1fr` no es fiable con contenedores anidados**. El patrón usado era:
+
+```scss
+&__compact-details {
+    display: grid;
+    grid-template-rows: 0fr;
+    transition: grid-template-rows 0.32s ease-out;
+}
+.promo-card.is-expanded &__compact-details {
+    grid-template-rows: 1fr;
+}
+&__compact-details-inner {
+    overflow: hidden;
+    min-height: 0;
+}
+```
+
+Este patrón requiere que **el contenedor padre NO tenga `overflow: hidden`** y que el contenido interno tenga `overflow: hidden` con `min-height: 0`. Sin embargo, múltiples niveles de anidación causan que el navegador no calcule correctamente la altura. En particular, `catalog__category-items` también usa el mismo patrón `grid-template-rows: 0fr → 1fr` para el acordeón de categorías, creando una anidación de grids que Chromium no resuelve correctamente en viewports móviles.
+
+### Solución final
+
+Se abandonó el patrón CSS Grid `0fr → 1fr` en favor de **`display: none / block` controlado por JS directamente**.
+
+**Cambios en JS** (`catalog.js`):
+- El listener se simplificó al máximo: captura cualquier clic dentro de `.promo-card, .card`, excluye clics en `.btn--primary` y `.catalog__accordion-header`, y ejecuta `card.classList.toggle('is-expanded')`.
+- Además, **setea directamente** `details.style.display = 'block'` o `'none'` según el estado de `is-expanded`, sin depender de transiciones CSS.
+
+**Cambios en CSS** (`_cards.scss` y `_catalog.scss`):
+- `.card__compact-details` y `.promo-card__compact-details`: `display: none` (móvil) / `display: block` (desktop). Cuando el padre tiene `is-expanded`: `display: block`.
+- Se eliminaron `display: grid`, `grid-template-rows`, y `transition` de estos contenedores.
+- `__compact-details-inner`: `overflow: hidden` → `overflow: visible` (ya no es necesario).
+
+### Decisión de diseño
+
+Se priorizó **robustez sobre animación suave**. El patrón CSS Grid `0fr → 1fr` ofrecía una transición animada visualmente atractiva, pero resultó poco fiable en contextos de anidación de grids. `display: none/block` es bulletproof: funciona en todos los navegadores y contextos, aunque pierde la animación de transición. Para un e-commerce funcional, la confiabilidad es más importante que la estética de la animación.
+
+### Archivos modificados
+
+- `src/js/catalog.js` — Listener simplificado con exclusión de botón/acordeón + control directo de `display`
+- `src/sass/components/_cards.scss` — `.card__compact-details`: `display: grid` → `display: none/block`. `__compact-details-inner`: `overflow: visible`
+- `src/sass/pages/_catalog.scss` — `.promo-card__compact-details`: mismo cambio. `__compact-details-inner`: `overflow: visible`
+
+### Validación
+- `npm run build` (560ms) ✅
+- Vista móvil: Promos colapsadas, al tocar se expanden con imagen + pieces + descripción ✅
+- Botón "Agregar" funciona correctamente ✅
+- Desktop: sin cambios ✅
+- `./init.sh` (57/57) ✅
