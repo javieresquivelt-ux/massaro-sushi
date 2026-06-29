@@ -1290,3 +1290,48 @@ promo-card (flex-direction: column)
 ```
 
 **Validación**: `npm run build` (584ms) ✅ — `./init.sh` (57/57) ✅
+
+---
+
+## 🐛 Bugfix 2.12.6: Eliminar badge de piezas sobre imagen de promos (2026-06-28)
+
+### Reporte
+En la carta categoría Promos, hay un badge rojo con la cantidad de piezas (ej. "13 pz.") superpuesto sobre la imagen de cada promo. El usuario considera que no aporta a la UX/UI y ensucia la navegación.
+
+### Causa raíz
+
+En el template de `promo-card` (`catalog.js`) existen dos elementos que muestran la cantidad de piezas:
+
+1. **Cabecera** (línea 76): `<h3 class="promo-card__name">${promo.name} — ${promo.pieces} pz.</h3>` — el nombre del producto incluye la cantidad de piezas inline. Esto es útil porque el usuario ve las piezas sin necesidad de expandir la promo.
+
+2. **Badge sobre imagen** (línea 88): `<span class="promo-card__pieces">${promo.pieces} pz.</span>` — un badge rojo con posición absoluta en la esquina superior derecha de la imagen-wrapper. Originalmente se incluyó para que al ver la imagen se supiera de un vistazo la cantidad de piezas, pero con la cabecera mostrando esa información (y en móvil la promo colapsada), el badge se volvió redundante.
+
+### Decisión de diseño
+
+Se elimina el badge sobre la imagen (`.promo-card__pieces`) por tres razones:
+
+1. **Redundancia**: La cabecera ya muestra "Promo 1 — 13 pz." — no hay necesidad de repetirlo sobre la imagen.
+2. **Estética**: El badge rojo sobre la imagen compite visualmente con la foto del producto, distrayendo la atención.
+3. **Consistencia**: Las cards regulares (Rolls, Especiales, etc.) no tienen badge de piezas sobre la imagen. Las promos tampoco deberían tenerlo.
+
+Se mantiene la información de piezas inline en el nombre de la cabecera (`<h3>Promo 1 — 13 pz.</h3>`).
+
+### Archivos a modificar
+
+- `src/js/catalog.js` — Eliminar `<span class="promo-card__pieces">` del template
+- `src/sass/pages/_catalog.scss` — Eliminar selector `.promo-card__pieces` y sus estilos
+
+### Validación esperada
+- Desktop: imágenes de promos sin badge rojo
+- Móvil: "Promo 1 — 13 pz." visible en cabecera colapsada, imagen sin badge al expandir
+- `./init.sh` (57/57) ✅
+
+### Ejecución Bugfix 2.12.6 (2026-06-28)
+
+**Implementado**:
+
+1. **Template** (`catalog.js`): Eliminada la línea `<span class="promo-card__pieces">${promo.pieces} pz.</span>` del template de `promo-card`. La información de piezas se mantiene inline en el nombre de la cabecera (`<h3>Promo 1 — 13 pz.</h3>`).
+
+2. **CSS**: No fue necesario modificar porque el selector `.promo-card__pieces` ya había sido eliminado en Bugfix 2.12.4.
+
+**Validación**: `npm run build` (587ms) ✅ — `./init.sh` (57/57) ✅

@@ -1274,3 +1274,34 @@ Header y detalles deben estar en columna. Solo dentro de detalles, imagen y desc
 - [x] Móvil: promos colapsadas, al expandir imagen + descripción
 - [x] `./init.sh` → 57/57 checks pasados
 
+---
+
+## 🐛 Bugfix 2.12.6: Eliminar badge de piezas sobre imagen de promos
+
+> **Problema reportado**: En la carta categoría Promos, hay un badge rojo con la cantidad de piezas (ej. "13 pz.") superpuesto sobre la imagen de cada promo. Esto no aporta a la UX/UI y ensucia visualmente la navegación.
+>
+> **Diagnóstico completo**: Documentado en `memory.md` → "Bugfix 2.12.6".
+
+### Causa raíz
+
+Existen **dos** elementos que muestran las piezas en cada promo:
+
+1. **Cabecera** (`catalog.js:76`): `<h3>Promo 1 — 13 pz.</h3>` — inline en el nombre, visible siempre. **Este se mantiene.**
+2. **Badge sobre imagen** (`catalog.js:88`): `<span class="promo-card__pieces">13 pz.</span>` — badge rojo superpuesto en la esquina de la imagen. **Este se elimina.**
+
+El badge sobre la imagen es redundante porque la cabecera ya muestra la cantidad de piezas inline en el nombre. En desktop, al estar la imagen siempre visible, el badge duplica información innecesariamente. En móvil, al expandir la promo, el badge aparece sobre la imagen pero la información ya está en la cabecera.
+
+### Solución
+
+### Paso 1 — Eliminar badge del template
+- [x] `src/js/catalog.js` — Eliminada línea `<span class="promo-card__pieces">${promo.pieces} pz.</span>` del template de promo-card.
+
+### Paso 2 — Limpiar CSS no usado
+- [x] `src/sass/pages/_catalog.scss` — El selector `.promo-card__pieces` ya no existe (fue eliminado en Bugfix 2.12.4). Sin cambios necesarios.
+
+### Paso 3 — Validación
+- [x] `npm run build` → sin errores (587ms)
+- [ ] Desktop: promos sin badge rojo sobre la imagen
+- [ ] Móvil: promos colapsadas con "Promo 1 — 13 pz." en cabecera, al expandir imagen sin badge
+- [x] `./init.sh` → 57/57 checks pasados
+

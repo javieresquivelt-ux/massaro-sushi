@@ -85,7 +85,6 @@ export function renderCatalog(expandPromos = true) {
             <div class="promo-card__compact-details-inner">
               <div class="promo-card__image-wrapper">
                 <img src="${promo.image}" alt="${promo.name}" class="promo-card__image" loading="lazy" />
-                <span class="promo-card__pieces">${promo.pieces} pz.</span>
               </div>
               <p class="promo-card__desc">${promo.description}</p>
             </div>
