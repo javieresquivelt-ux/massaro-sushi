@@ -33,6 +33,8 @@
     cursor: pointer;
 
     @media (min-width: 768px) {
+      flex-direction: column;
+      align-items: stretch;
       cursor: default;
     }
   }
@@ -48,14 +50,27 @@
     gap: var(--spacing-xs);
     flex-wrap: wrap;
     margin-top: var(--spacing-xs);
+
+    @media (min-width: 768px) {
+      margin-top: var(--spacing-sm);
+    }
   }
 
   &__title {
     font-size: 1.25rem;
     color: var(--text-color);
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+
+    @media (max-width: 767px) {
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    @media (min-width: 768px) {
+      white-space: normal;
+      overflow: visible;
+      text-overflow: clip;
+    }
   }
 
   // Precio con estilo chip amarillo (inline en cabecera)

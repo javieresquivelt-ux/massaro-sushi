@@ -47,9 +47,9 @@ export function renderCatalog(expandPromos = true) {
                   ${badgeHtml}
                   ${piecesHtml}
                   <span class="card__price">${formatPrice(product.price)}</span>
+                  <button class="btn btn--primary">Agregar</button>
                 </div>
               </div>
-              <button class="btn btn--primary">Agregar</button>
               <span class="card__toggle-icon">▼</span>
             </div>
             <div class="card__compact-details">

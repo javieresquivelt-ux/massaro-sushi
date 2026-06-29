@@ -1335,3 +1335,91 @@ Se mantiene la información de piezas inline en el nombre de la cabecera (`<h3>P
 2. **CSS**: No fue necesario modificar porque el selector `.promo-card__pieces` ya había sido eliminado en Bugfix 2.12.4.
 
 **Validación**: `npm run build` (587ms) ✅ — `./init.sh` (57/57) ✅
+
+---
+
+## 🐛 Bugfix 2.12.7: Nombre de producto cortado en cards regulares desktop (2026-06-28)
+
+### Reporte
+En desktop, en todas las categorías de productos regulares (Rolls a la Carta, Especiales, Hard Rolls, Al Plato, Tabla Massaro), el nombre del producto aparece cortado a solo 2-3 caracteres visibles. El precio, el botón "Agregar" y el nombre compiten por el espacio en una misma fila flex horizontal.
+
+### Causa raíz
+
+La cabecera de card (`card__compact-header`) tiene `display: flex; flex-direction: row` con tres hijos:
+
+```
+┌─ card__compact-header (flex row) ─────────────────────┐
+│ ┌─ compact-header-info (flex:1) ─┐ ┌── btn ──┐ ┌─ ▼ ┐│
+│ │ card__title (white-space nowrap)│ │ Agregar │ │   ││
+│ │ [badge] $precio (chip)         │ │ (~85px) │ │   ││
+│ └────────────────────────────────┘ └─────────┘ └────┘│
+└───────────────────────────────────────────────────────┘
+```
+
+En desktop, la grid `catalog__grid` usa:
+- `600px`: 2 columnas
+- `900px`: 3 columnas  
+- `1200px`: 4 columnas
+
+Con 3-4 columnas, cada card mide ~250-300px. El botón "Agregar" ocupa ~85px, el precio chip ~70px, y el toggle ▼ ~15px (oculto en desktop). Al `card__title` con `flex: 1` le quedan ~80-100px. Con `font-size: 1.25rem` (~20px) y `white-space: nowrap`, solo caben 4-5 caracteres. El `text-overflow: ellipsis` corta el resto.
+
+Las Promos no se ven afectadas porque no están en la grid (`catalog__promos` usa `flex-direction: column` con `grid-column: 1 / -1`) y tienen un layout completamente diferente.
+
+### Solución
+
+**Paso 1 — Mover botón a la meta** (`catalog.js`): El botón "Agregar" se mueve de ser hermano directo de `card__compact-header-info` a estar dentro de `card__compact-header-meta`, junto al precio y los badges. Esto permite que en desktop, el nombre ocupe todo el ancho y precio+botón estén en una fila debajo.
+
+**Paso 2 — Cabecera en column en desktop** (`_cards.scss`): 
+- `card__compact-header` en `min-width: 768px`: `flex-direction: column; align-items: stretch`.
+- `card__title` en desktop: eliminar `white-space: nowrap` para que el texto fluya y no se corte con ellipsis.
+- `card__compact-header-meta` en desktop: mantener flex row para que precio y botón estén en la misma fila.
+
+**Layout resultante en desktop:**
+```
+┌─ card ────────────────────────────────────────────┐
+│ ┌─ card__compact-header (flex column) ──────────┐ │
+│ │ card__title (nombre completo, sin nowrap)      │ │
+│ │ card__compact-header-meta (flex row)          │ │
+│ │ [badge] $precio  [Agregar]                    │ │
+│ └───────────────────────────────────────────────┘ │
+│ ┌─ card__compact-details ───────────────────────┐ │
+│ │ [imagen 100%]  [descripción]                  │ │
+│ └───────────────────────────────────────────────┘ │
+└──────────────────────────────────────────────────┘
+```
+
+### Archivos a modificar
+- `src/js/catalog.js` — Mover botón "Agregar" a `card__compact-header-meta`
+- `src/sass/components/_cards.scss` — Cabecera a column en desktop, title sin nowrap
+
+### Validación esperada
+- Desktop: nombre completo visible, precio y botón en fila debajo
+- Móvil: sin cambios, cabecera compacta con todo en fila
+- `./init.sh` (57/57) ✅
+
+### Ejecución Bugfix 2.12.7 (2026-06-28)
+
+**Implementado**:
+
+1. **Template** (`catalog.js`): El botón "Agregar" se movió de ser hermano directo de `card__compact-header-info` a estar dentro de `card__compact-header-meta`, después del precio. Esto permite que en desktop título y meta+botón se apilen verticalmente.
+
+2. **CSS Cards** (`_cards.scss`):
+   - `card__compact-header` en `min-width: 768px`: `flex-direction: column; align-items: stretch`.
+   - `card__title` en desktop: `white-space: normal; overflow: visible` (el texto fluye sin cortarse).
+   - `card__title` en móvil: se mantiene `white-space: nowrap; overflow: hidden; text-overflow: ellipsis` (comportamiento compacto).
+   - `card__compact-header-meta` en desktop: `margin-top: var(--spacing-sm)` para separar del título.
+
+**Layout resultante en desktop:**
+```
+┌─ card ───────────────────────────────────────────┐
+│ ┌─ card__compact-header (flex column) ─────────┐ │
+│ │ Nombre del producto completo (sin cortar)     │ │
+│ │ [Badge]  $5.000  [Agregar]                    │ │
+│ └──────────────────────────────────────────────┘ │
+│ ┌─ card__compact-details ──────────────────────┐ │
+│ │ [imagen 100%]  [descripción]                 │ │
+│ └──────────────────────────────────────────────┘ │
+└──────────────────────────────────────────────────┘
+```
+
+**Validación**: `npm run build` (552ms) ✅ — `./init.sh` (57/57) ✅

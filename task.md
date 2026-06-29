@@ -1301,7 +1301,42 @@ El badge sobre la imagen es redundante porque la cabecera ya muestra la cantidad
 
 ### Paso 3 — Validación
 - [x] `npm run build` → sin errores (587ms)
-- [ ] Desktop: promos sin badge rojo sobre la imagen
-- [ ] Móvil: promos colapsadas con "Promo 1 — 13 pz." en cabecera, al expandir imagen sin badge
+- [x] Desktop: promos sin badge rojo sobre la imagen
+- [x] Móvil: promos colapsadas con "Promo 1 — 13 pz." en cabecera, al expandir imagen sin badge
+- [x] `./init.sh` → 57/57 checks pasados
+
+---
+
+## 🐛 Bugfix 2.12.7: Nombre de producto cortado en cards regulares (desktop)
+
+> **Problema reportado**: En desktop, en todas las categorías excepto Promos (Rolls a la Carta, Especiales, Hard Rolls, Al Plato, Tabla Massaro), el nombre del producto aparece cortado — solo se ven los primeros 2-3 caracteres — porque el título, el precio chip y el botón "Agregar" están todos en una misma fila flex sin suficiente espacio.
+>
+> **Diagnóstico completo**: Documentado en `memory.md` → "Bugfix 2.12.7".
+
+### Causa raíz
+
+La cabecera de las cards regulares (`card__compact-header`) usa `display: flex; flex-direction: row` con tres elementos en fila:
+
+1. `card__compact-header-info` (flex: 1): título + meta (badges + precio)
+2. `btn--primary`: botón "Agregar" (~85px de ancho mínimo)
+3. `card__toggle-icon`: "▼" (oculto en desktop)
+
+En desktop, la grid de catálogo (`catalog__grid`) tiene 3-4 columnas (a partir de 900px y 1200px). Cada card mide ~250-300px de ancho. Con el botón (~85px) y el precio chip (~70px con padding), al título le quedan ~80-100px. A `font-size: 1.25rem` (~20px) con `white-space: nowrap`, solo entran 4-5 caracteres antes de que `text-overflow: ellipsis` corte el nombre.
+
+Las Promos no sufren este problema porque usan un layout diferente (imagen en cabecera compacta + detalles debajo) y ocupan todo el ancho del contenedor.
+
+### Solución
+
+### Paso 1 — Mover botón "Agregar" dentro de `card__compact-header-meta`
+- [x] `src/js/catalog.js` — Botón "Agregar" movido a `card__compact-header-meta`, después del precio.
+
+### Paso 2 — Cambiar layout de cabecera a column en desktop
+- [x] `src/sass/components/_cards.scss` — `card__compact-header` en `min-width: 768px`: `flex-direction: column; align-items: stretch`.
+- [x] `card__title` en desktop: `white-space: normal; overflow: visible` (en móvil se mantiene `nowrap` con ellipsis).
+
+### Paso 3 — Validación
+- [x] `npm run build` → sin errores (552ms)
+- [ ] Desktop: nombre de producto completo visible, precio y botón en fila debajo
+- [ ] Móvil: sin cambios, cabecera compacta con todo en fila
 - [x] `./init.sh` → 57/57 checks pasados
 
