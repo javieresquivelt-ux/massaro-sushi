@@ -92,21 +92,19 @@
   // Detalles colapsables (imagen + descripción)
   // ==========================================
   &__compact-details {
-    display: grid;
-    grid-template-rows: 0fr;
-    transition: grid-template-rows 0.32s ease-out;
+    display: none;
 
     @media (min-width: 768px) {
-      grid-template-rows: 1fr;
+      display: block;
     }
   }
 
   .card.is-expanded &__compact-details {
-    grid-template-rows: 1fr;
+    display: block;
   }
 
   &__compact-details-inner {
-    overflow: hidden;
+    overflow: visible;
     min-height: 0;
   }
 

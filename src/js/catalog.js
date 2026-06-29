@@ -179,6 +179,10 @@ export function initCatalogSidebar(activeCategory = 'promos') {
     if (e.target.closest('.btn--primary')) return;
     if (e.target.closest('.catalog__accordion-header')) return;
     card.classList.toggle('is-expanded');
+    const details = card.querySelector('.card__compact-details, .promo-card__compact-details');
+    if (details) {
+      details.style.display = card.classList.contains('is-expanded') ? 'block' : 'none';
+    }
   });
 
   // Event delegation para botones "Agregar"
